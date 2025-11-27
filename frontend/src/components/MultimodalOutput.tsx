@@ -1,4 +1,4 @@
-import { MultimodalOutput as MultimodalOutputType } from '../../types/multimodal';
+import { MultimodalOutput as MultimodalOutputType } from '../types/multimodal';
 
 interface MultimodalOutputProps {
   output: MultimodalOutputType;

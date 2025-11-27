@@ -5,6 +5,7 @@ import { orchestrateAI } from '../ai/orchestrator.js';
 import { executePythonCode } from '../code/executor.js';
 import { generateTable } from '../tables/generator.js';
 import { generateResearchReport } from '../research/reportGenerator.js';
+import { generatePythonCode } from '../code/generator.js';
 
 const prisma = new PrismaClient();
 const logger = createLogger({
@@ -216,8 +217,12 @@ async function executeCodeTask(
   previousResults: Record<string, any>
 ): Promise<any> {
   // 코드 생성 및 실행
-  const code = step.description; // 실제로는 코드 생성 필요
-  const result = await executePythonCode(code);
+  const context = Object.values(previousResults)
+    .map((r) => (typeof r === 'string' ? r : JSON.stringify(r)))
+    .join('\n\n');
+  
+  const generatedCode = await generatePythonCode(step.description, context);
+  const result = await executePythonCode(generatedCode.code);
   return result.output;
 }
 
@@ -240,4 +245,3 @@ async function executeResearchTask(
   const report = await generateResearchReport(step.description);
   return report;
 }
-

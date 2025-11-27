@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  name         String    @db.VarChar(255)
+  role         String    @default("user") @db.VarChar(50)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  conversations Conversation[]
+  documents      Document[]
+  apiKeys        ApiKey[]      @relation("CreatedBy")
+  guardrails     Guardrail[]   @relation("CreatedBy")
+  workflows      Workflow[]
+  logs           Log[]
+
+  @@map("users")
+}
+
+model Conversation {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  title     String?   @db.VarChar(500)
+  topic     String?   @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  documents Document[]
+  workflows Workflow[]
+
+  @@index([userId])
+  @@map("conversations")
+}
+
+model Message {
+  id             Int       @id @default(autoincrement())
+  conversationId Int       @map("conversation_id")
+  role           String    @db.VarChar(50)
+  content        String    @db.Text
+  metadata       Json?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model Document {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  conversationId  Int?      @map("conversation_id")
+  filename        String    @db.VarChar(500)
+  originalFilename String   @map("original_filename") @db.VarChar(500)
+  fileType        String?   @map("file_type") @db.VarChar(100)
+  fileSize        BigInt?   @map("file_size")
+  s3Key           String    @map("s3_key") @db.VarChar(1000)
+  s3Url           String?   @map("s3_url") @db.VarChar(1000)
+  metadata        Json?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([conversationId])
+  @@map("documents")
+}
+
+model ApiKey {
+  id        Int       @id @default(autoincrement())
+  provider  String    @db.VarChar(50)
+  apiKey    String    @map("api_key") @db.Text
+  isActive  Boolean   @default(true) @map("is_active")
+  weight    Decimal   @default(1.0) @db.Decimal(5, 2)
+  metadata  Json?
+  createdBy Int?      @map("created_by")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  creator User? @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@map("api_keys")
+}
+
+model Workflow {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  conversationId Int?     @map("conversation_id")
+  name          String    @db.VarChar(255)
+  plan          Json
+  status        String    @default("pending") @db.VarChar(50)
+  currentStep   Int       @default(0) @map("current_step")
+  results       Json?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([conversationId])
+  @@map("workflows")
+}
+
+model Log {
+  id            Int       @id @default(autoincrement())
+  userId        Int?      @map("user_id")
+  screenName    String?   @map("screen_name") @db.VarChar(255)
+  screenUrl     String?   @map("screen_url") @db.VarChar(1000)
+  callerFunction String?  @map("caller_function") @db.VarChar(255)
+  buttonId      String?   @map("button_id") @db.VarChar(255)
+  calledApi     String?   @map("called_api") @db.VarChar(255)
+  backendApiUrl String?   @map("backend_api_url") @db.VarChar(1000)
+  logType       String    @map("log_type") @db.VarChar(50)
+  message       String?   @db.Text
+  errorCode     String?   @map("error_code") @db.VarChar(100)
+  metadata      Json?
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("logs")
+}
+
+model Guardrail {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  description String?   @db.Text
+  pattern     String    @db.Text
+  action      String    @default("block") @db.VarChar(50)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdBy   Int?      @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  creator User? @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@map("guardrails")
+}
+

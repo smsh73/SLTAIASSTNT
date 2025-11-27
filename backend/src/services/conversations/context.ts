@@ -64,18 +64,34 @@ async function createSummarizedContext(
       return recentMessages;
     }
 
-    // 오래된 메시지 요약 생성 (실제로는 AI 사용)
+    // 오래된 메시지 요약 생성 (AI 사용)
+    const { orchestrateAI } = await import('../ai/orchestrator.js');
     const oldContext = oldMessages
       .map((m) => `${m.role}: ${m.content}`)
       .join('\n\n');
 
-    // 요약 생성 (간단한 구현)
-    const summary = `[이전 대화 요약]\n${oldContext.substring(0, 1000)}...`;
+    const summaryPrompt = `다음 대화 내용을 간결하게 요약해주세요:\n\n${oldContext.substring(0, 8000)}`;
+    
+    const summary = await orchestrateAI(
+      [
+        {
+          role: 'system',
+          content: '당신은 대화 요약 전문가입니다. 핵심 내용만 간결하게 요약합니다.',
+        },
+        {
+          role: 'user',
+          content: summaryPrompt,
+        },
+      ],
+      summaryPrompt
+    );
+
+    const summaryText = summary || `[이전 대화 요약]\n${oldContext.substring(0, 1000)}...`;
 
     return [
       {
         role: 'system',
-        content: summary,
+        content: summaryText,
       },
       ...recentMessages,
     ];

@@ -65,9 +65,27 @@ export async function createWorkflowPlan(
       }
     }
 
+    // 각 단계의 예상 시간 계산
+    let totalTime = 0;
+    for (const step of steps) {
+      switch (step.action) {
+        case 'code':
+          totalTime += 3;
+          break;
+        case 'table':
+          totalTime += 2;
+          break;
+        case 'research':
+          totalTime += 5;
+          break;
+        default:
+          totalTime += 2;
+      }
+    }
+
     const plan: WorkflowPlan = {
       steps,
-      estimatedTotalTime: steps.length * 5, // 임시: 각 단계당 5분
+      estimatedTotalTime: totalTime,
       requiredResources: ['ai', 'database'],
     };
 

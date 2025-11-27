@@ -62,7 +62,7 @@ export async function chatWithClaude(
         content: m.content,
       })) as any;
 
-    const response = await claude.messages.create({
+    const response = await (claude as any).messages.create({
       model: options?.model || 'claude-3-opus-20240229',
       max_tokens: 4096,
       temperature: options?.temperature || 0.7,

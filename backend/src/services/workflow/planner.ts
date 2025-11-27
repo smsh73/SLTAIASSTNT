@@ -51,33 +51,62 @@ export async function createWorkflowPlan(
     const lines = response.split('\n').filter((line) => line.trim().length > 0);
 
     let stepId = 1;
+    let currentStep: Partial<WorkflowStep> | null = null;
+
     for (const line of lines) {
-      if (line.includes('단계') || line.includes('Step') || line.startsWith('-')) {
-        const cleanLine = line.replace(/^[-*•]\s*/, '');
+      const trimmedLine = line.trim();
+      
+      // 단계 시작 감지
+      if (trimmedLine.match(/^\d+[\.\)]\s*|^[-*•]\s*|단계\s*\d+|Step\s*\d+/i)) {
+        // 이전 단계 저장
+        if (currentStep && currentStep.name) {
+          steps.push(currentStep as WorkflowStep);
+        }
+        
+        const cleanLine = trimmedLine.replace(/^\d+[\.\)]\s*|^[-*•]\s*|단계\s*\d+:|Step\s*\d+:/i, '');
         const parts = cleanLine.split(':');
         const name = parts[0].trim();
         const rest = parts.slice(1).join(':').trim();
 
         // 작업 유형 추출
         let action: WorkflowStep['action'] = 'execute';
-        if (rest.includes('code') || rest.includes('코드')) {
+        const lowerRest = rest.toLowerCase();
+        if (lowerRest.includes('code') || lowerRest.includes('코드') || lowerRest.includes('python')) {
           action = 'code';
-        } else if (rest.includes('table') || rest.includes('표')) {
+        } else if (lowerRest.includes('table') || lowerRest.includes('표') || lowerRest.includes('데이터표')) {
           action = 'table';
-        } else if (rest.includes('research') || rest.includes('리서치')) {
+        } else if (lowerRest.includes('research') || lowerRest.includes('리서치') || lowerRest.includes('조사')) {
           action = 'research';
         }
 
-        const step: WorkflowStep = {
+        currentStep = {
           id: `step-${stepId}`,
           name,
-          description: rest,
+          description: rest || name,
           action,
           dependencies: stepId > 1 ? [`step-${stepId - 1}`] : [],
         };
-        steps.push(step);
         stepId++;
+      } else if (currentStep && trimmedLine.length > 0) {
+        // 현재 단계의 설명에 추가
+        currentStep.description += '\n' + trimmedLine;
       }
+    }
+
+    // 마지막 단계 저장
+    if (currentStep && currentStep.name) {
+      steps.push(currentStep as WorkflowStep);
+    }
+
+    // 단계가 없으면 기본 단계 생성
+    if (steps.length === 0) {
+      steps.push({
+        id: 'step-1',
+        name: '작업 실행',
+        description: goal,
+        action: 'execute',
+        dependencies: [],
+      });
     }
 
     const plan: WorkflowPlan = {

@@ -64,7 +64,7 @@ export async function chatWithGemini(
       .join('\n\n') + '\n\nAssistant:';
 
     const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      contents: [{ role: 'user' as const, parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: options?.temperature || 0.7,
       },

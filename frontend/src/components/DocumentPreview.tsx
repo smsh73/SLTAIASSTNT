@@ -6,7 +6,7 @@ interface DocumentPreviewProps {
 
 export default function DocumentPreview({ documentId }: DocumentPreviewProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState<string>('');
+  const [content] = useState<string>('');
 
   useEffect(() => {
     if (documentId) {

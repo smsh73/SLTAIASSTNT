@@ -7,13 +7,7 @@ import LogMonitor from '../components/LogMonitor';
 import ConversationHistory from '../components/ConversationHistory';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
-
-interface Message {
-  id: number;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  createdAt: string;
-}
+import { Message } from '../types/message';
 
 export default function Chat() {
   const { conversationId } = useParams();
@@ -22,7 +16,6 @@ export default function Chat() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [conversation, setConversation] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { token } = useAuthStore();
 
@@ -44,8 +37,7 @@ export default function Chat() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setConversation(response.data);
-      setMessages(response.data.messages || []);
+      setMessages(response.data.conversation?.messages || []);
     } catch (error) {
       console.error('Failed to load conversation', error);
     }

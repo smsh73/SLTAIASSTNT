@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePromptSuggestion } from '../hooks/usePromptSuggestion';
 
 interface ChatInputProps {
@@ -16,14 +16,12 @@ export default function ChatInput({
   onSuggestionsChange,
   loading,
 }: ChatInputProps) {
-  const [words, setWords] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { getSuggestions } = usePromptSuggestion();
 
   useEffect(() => {
     if (value) {
       const wordArray = value.split(/\s+/).filter((w) => w.length > 0);
-      setWords(wordArray);
       
       // 단어 단위로 프롬프트 추천 요청
       if (wordArray.length > 0) {
@@ -32,7 +30,6 @@ export default function ChatInput({
         });
       }
     } else {
-      setWords([]);
       onSuggestionsChange([]);
     }
   }, [value, getSuggestions, onSuggestionsChange]);

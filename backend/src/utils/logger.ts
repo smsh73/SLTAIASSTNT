@@ -46,6 +46,8 @@ interface LogData {
   message?: string;
   errorCode?: string;
   metadata?: Record<string, any>;
+  // 추가 필드들 (metadata에 저장)
+  [key: string]: any;
 }
 
 export async function logToDatabase(data: LogData): Promise<void> {

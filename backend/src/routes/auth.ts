@@ -189,9 +189,10 @@ function generateToken(userId: number): string {
     throw new Error('JWT_SECRET not configured');
   }
 
+  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
   return jwt.sign({ userId }, secret, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  });
+    expiresIn,
+  } as jwt.SignOptions);
 }
 
 export default router;

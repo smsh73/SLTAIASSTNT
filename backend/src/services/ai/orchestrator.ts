@@ -81,7 +81,6 @@ export async function orchestrateAI(
   }
 }
 
-// 임시 import (실제로는 router에서 가져와야 함)
 import { chatWithOpenAI } from './openai.js';
 import { chatWithClaude } from './claude.js';
 import { chatWithGemini } from './gemini.js';

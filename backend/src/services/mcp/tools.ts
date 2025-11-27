@@ -14,11 +14,11 @@ export async function registerMCPConnection(
   url: string
 ): Promise<MCPConnection> {
   try {
+    const connectionId = `mcp-${Date.now()}`;
     const connection = await mcpClient.connect({
-      id: `mcp-${Date.now()}`,
+      id: connectionId,
       name,
       url,
-      tools: [],
       isActive: false,
     });
 

@@ -16,9 +16,9 @@ export async function ensureImageExists(): Promise<boolean> {
   try {
     const images = await docker.listImages();
     const exists = images.some(
-      (img) =>
+      (img: any) =>
         img.RepoTags &&
-        img.RepoTags.some((tag) => tag.includes(CONTAINER_IMAGE))
+        img.RepoTags.some((tag: string) => tag.includes(CONTAINER_IMAGE))
     );
 
     if (!exists) {
@@ -43,7 +43,7 @@ export async function ensureImageExists(): Promise<boolean> {
 export async function cleanupContainers(): Promise<void> {
   try {
     const containers = await docker.listContainers({ all: true });
-    const executorContainers = containers.filter((c) =>
+    const executorContainers = containers.filter((c: any) =>
       c.Image.includes(CONTAINER_IMAGE)
     );
 

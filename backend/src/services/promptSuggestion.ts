@@ -66,14 +66,22 @@ export async function generateSuggestions(
       }
     }
 
-    // 기본 제안 (키워드가 없을 때)
+    // 기본 제안 (키워드가 없을 때) - 실제 사용 사례 기반
     if (suggestions.length === 0) {
-      suggestions.push(
-        '문서를 업로드하고 분석해줘',
-        '표 형식의 데이터를 만들어줘',
-        '리서치 보고서를 작성해줘',
-        '코드를 생성하고 실행해줘'
-      );
+      const currentTime = new Date().getHours();
+      const timeBasedSuggestions = currentTime >= 9 && currentTime < 18 
+        ? [
+            '오늘의 업무 일정을 정리해줘',
+            '프로젝트 진행 상황을 표로 정리해줘',
+            '고객사 요청 자료를 작성해줘',
+          ]
+        : [
+            '내일 회의 자료를 준비해줘',
+            '주간 리포트를 작성해줘',
+            '데이터 분석 결과를 표로 만들어줘',
+          ];
+      
+      suggestions.push(...timeBasedSuggestions);
     }
 
     logger.debug('Generated prompt suggestions', {

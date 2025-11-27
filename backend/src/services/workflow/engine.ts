@@ -32,7 +32,7 @@ export async function executeWorkflow(
       throw new Error('Workflow not found');
     }
 
-    const plan = workflow.plan as WorkflowPlan;
+    const plan = workflow.plan as unknown as WorkflowPlan;
     const execution: WorkflowExecution = {
       workflowId,
       currentStep: workflow.currentStep,

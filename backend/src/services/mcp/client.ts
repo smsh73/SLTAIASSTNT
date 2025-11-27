@@ -130,7 +130,7 @@ class MCPClient {
         throw new Error(`Failed to fetch tools: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as { tools?: MCPTool[] };
       return data.tools || [];
     } catch (error) {
       logger.warning('Failed to fetch MCP tools, using empty list', {
@@ -161,7 +161,7 @@ class MCPClient {
         throw new Error(`Failed to execute tool: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as { result?: any };
       return data.result;
     } catch (error) {
       logger.error('Failed to call MCP tool', {

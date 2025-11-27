@@ -32,11 +32,12 @@ export async function getProviderWeights(): Promise<ProviderWeight[]> {
     for (const key of apiKeys) {
       const provider = key.provider as ProviderWeight['provider'];
       const existing = providerMap.get(provider);
+      const keyWeight = typeof key.weight === 'object' ? Number(key.weight) : Number(key.weight);
 
-      if (!existing || key.weight > existing.weight) {
+      if (!existing || keyWeight > existing.weight) {
         providerMap.set(provider, {
           provider,
-          weight: Number(key.weight),
+          weight: keyWeight,
           isActive: key.isActive,
         });
       }

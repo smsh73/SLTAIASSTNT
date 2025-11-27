@@ -99,7 +99,7 @@ router.post(
 
       // 대화 이력 로드
       let conversation = null;
-      let historyMessages: Array<{ role: string; content: string }> = [];
+      let historyMessages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
 
       if (conversationId) {
         conversation = await prisma.conversation.findUnique({
@@ -114,7 +114,7 @@ router.post(
 
         if (conversation) {
           historyMessages = conversation.messages.map((m) => ({
-            role: m.role,
+            role: m.role as 'user' | 'assistant' | 'system',
             content: m.content,
           }));
         }

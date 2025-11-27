@@ -132,23 +132,49 @@ function extractDependencies(code: string): string[] {
 }
 
 function convertToNotebookFormat(content: string): string {
-  // 간단한 Notebook 형식 변환
-  const cells = content.split(/\n{2,}/).map((cell, index) => ({
-    cell_type: 'code',
-    execution_count: null,
+  // 코드 블록에서 실제 코드 추출
+  const codeBlocks = content.match(/```python\n([\s\S]*?)\n```/g) || 
+                     content.match(/```\n([\s\S]*?)\n```/g) ||
+                     [content];
+  
+  const cells = codeBlocks.map((block, index) => {
+    // 코드 블록에서 실제 코드 추출
+    const codeMatch = block.match(/```(?:python)?\n([\s\S]*?)\n```/) || 
+                      block.match(/```\n([\s\S]*?)\n```/);
+    const code = codeMatch ? codeMatch[1] : block.replace(/```(?:python)?\n?/g, '').replace(/```\n?/g, '');
+    
+    return {
+      cell_type: 'code',
+      execution_count: null,
+      metadata: {},
+      source: code.split('\n').filter((line: string) => line.trim().length > 0),
+      outputs: [],
+    };
+  });
+
+  // 마크다운 셀도 추가 (설명용)
+  const markdownCells = content.split(/\n{2,}/).filter((section) => {
+    return !section.includes('```') && section.trim().length > 0;
+  }).map((text) => ({
+    cell_type: 'markdown',
     metadata: {},
-    source: cell.split('\n'),
-    outputs: [],
+    source: text.split('\n'),
   }));
+
+  const allCells = [...markdownCells, ...cells];
 
   return JSON.stringify(
     {
-      cells,
+      cells: allCells,
       metadata: {
         kernelspec: {
           display_name: 'Python 3',
           language: 'python',
           name: 'python3',
+        },
+        language_info: {
+          name: 'python',
+          version: '3.11',
         },
       },
       nbformat: 4,

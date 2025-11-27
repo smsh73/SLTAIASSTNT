@@ -1,4 +1,4 @@
-import { Message } from '../pages/Chat';
+import { Message } from '../types/message';
 
 interface ConversationHistoryProps {
   messages: Message[];

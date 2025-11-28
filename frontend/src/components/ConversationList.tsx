@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -15,9 +15,11 @@ export default function ConversationList() {
   const [loading, setLoading] = useState(true);
   const { token } = useAuthStore();
   const navigate = useNavigate();
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (token) {
+    if (token && !fetchedRef.current) {
+      fetchedRef.current = true;
       fetchConversations();
     }
   }, [token]);

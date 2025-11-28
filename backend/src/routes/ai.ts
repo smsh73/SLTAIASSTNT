@@ -218,11 +218,13 @@ router.post(
         data: [
           {
             conversationId: finalConversationId,
+            userId: req.userId!,
             role: 'user',
             content: finalMessage,
           },
           {
             conversationId: finalConversationId,
+            userId: req.userId!,
             role: 'assistant',
             content: aiResponse,
           },

@@ -3,7 +3,6 @@ import { createLogger } from '../../utils/logger.js';
 import { decrypt } from '../../utils/encryption.js';
 import { getPrismaClient } from '../../utils/database.js';
 import { getCircuitBreaker } from './circuitBreaker.js';
-import { getCircuitBreaker } from './circuitBreaker.js';
 
 const prisma = getPrismaClient();
 const logger = createLogger({

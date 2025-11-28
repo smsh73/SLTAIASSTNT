@@ -44,7 +44,7 @@ export async function orchestrateAI(
     if (!result) {
       // 폴백 프로바이더 시도 (자동 폴백)
       const allProviders: Array<'openai' | 'claude' | 'gemini' | 'perplexity' | 'luxia'> = 
-        options?.fallbackProviders || ['openai', 'claude', 'gemini', 'perplexity', 'luxia'];
+        (options?.fallbackProviders as Array<'openai' | 'claude' | 'gemini' | 'perplexity' | 'luxia'>) || ['openai', 'claude', 'gemini', 'perplexity', 'luxia'];
       
       logger.info('Trying fallback providers', {
         fallbacks: allProviders,

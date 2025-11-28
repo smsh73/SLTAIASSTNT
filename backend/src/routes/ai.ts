@@ -3,12 +3,12 @@ import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import { generateSuggestions } from '../services/promptSuggestion.js';
 import { orchestrateAI } from '../services/ai/orchestrator.js';
 import { validatePrompt } from '../services/guardrails/validator.js';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from '../utils/database.js';
 import { createLogger } from '../utils/logger.js';
 import { validateInput } from '../middleware/security.js';
 import { aiSchemas } from '../utils/validation.js';
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
 const router = Router();
 

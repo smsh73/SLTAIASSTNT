@@ -83,6 +83,12 @@ export async function orchestrateAI(
             const duration = Date.now() - startTime;
             recordAIRequest(provider, 'success', duration);
             
+            // 응답 캐싱
+            await setCache(cacheKey, response, {
+              prefix: CACHE_PREFIXES.API_RESPONSE,
+              ttl: 3600,
+            });
+            
             return response;
           }
         } catch (providerError) {

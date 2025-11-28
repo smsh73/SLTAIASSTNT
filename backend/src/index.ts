@@ -5,8 +5,15 @@ import { logger } from './utils/logger.js';
 import { configureCORS, securityHeaders } from './middleware/security.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
 import { metricsMiddleware } from './middleware/metrics.js';
+import { validateEnvironment } from './utils/env-validator.js';
 
-dotenv.config();
+// 환경 변수 검증 (애플리케이션 시작 전)
+try {
+  validateEnvironment();
+} catch (error) {
+  console.error('❌ 환경 변수 검증 실패:', error);
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -84,6 +91,11 @@ app.use('/metrics', metricsRoutes);
 
 // Swagger API 문서
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// 에러 핸들러 (모든 라우트 이후에 위치)
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, {

@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest, requireAdmin } from '../../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from '../../utils/database.js';
 import { createLogger } from '../../utils/logger.js';
 import { encrypt, decrypt } from '../../utils/encryption.js';
+import { validateInput } from '../../middleware/security.js';
+import { adminSchemas } from '../../utils/validation.js';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
 // API 키 목록
 router.get(
@@ -53,11 +55,43 @@ router.get(
   }
 );
 
+/**
+ * @swagger
+ * /api/admin/api-keys:
+ *   post:
+ *     tags: [Admin]
+ *     summary: API 키 생성
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - provider
+ *               - apiKey
+ *             properties:
+ *               provider:
+ *                 type: string
+ *                 enum: [openai, claude, gemini, perplexity, luxia]
+ *               apiKey:
+ *                 type: string
+ *               weight:
+ *                 type: number
+ *               isActive:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: API 키 생성 성공
+ */
 // API 키 생성
 router.post(
   '/',
   authenticateToken,
   requireAdmin,
+  validateInput(adminSchemas.apiKey),
   async (req: AuthRequest, res: Response) => {
     const logger = createLogger({
       screenName: 'Admin',

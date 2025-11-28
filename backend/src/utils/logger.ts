@@ -1,7 +1,7 @@
 import winston from 'winston';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from './database.js';
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),

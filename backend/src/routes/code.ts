@@ -12,10 +12,39 @@ import { createLogger } from '../utils/logger.js';
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/code/generate:
+ *   post:
+ *     tags: [Code]
+ *     summary: Python 코드 생성
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - requirement
+ *             properties:
+ *               requirement:
+ *                 type: string
+ *               context:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [python, notebook]
+ *     responses:
+ *       200:
+ *         description: 코드 생성 성공
+ */
 // 코드 생성
 router.post(
   '/generate',
   authenticateToken,
+  validateInput(codeSchemas.generate),
   async (req: AuthRequest, res: Response) => {
     const logger = createLogger({
       screenName: 'Code',
@@ -64,10 +93,41 @@ router.post(
   }
 );
 
+/**
+ * @swagger
+ * /api/code/execute:
+ *   post:
+ *     tags: [Code]
+ *     summary: Python 코드 실행
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [python, notebook]
+ *               timeout:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: 코드 실행 성공
+ *       400:
+ *         description: 코드 검증 실패
+ */
 // 코드 실행
 router.post(
   '/execute',
   authenticateToken,
+  validateInput(codeSchemas.execute),
   async (req: AuthRequest, res: Response) => {
     const logger = createLogger({
       screenName: 'Code',

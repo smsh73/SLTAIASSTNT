@@ -1,8 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 const logger = createLogger({
   screenName: 'RateLimiter',
   callerFunction: 'rateLimiter',

@@ -8,12 +8,12 @@ import {
   analyzeDocumentStatistics,
   generateDocumentFromContent,
 } from '../services/agents/documentAgent.js';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from '../utils/database.js';
 import { createLogger } from '../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // 문서 업로드

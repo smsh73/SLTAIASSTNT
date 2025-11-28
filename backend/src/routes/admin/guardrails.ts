@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest, requireAdmin } from '../../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from '../../utils/database.js';
 import { createLogger } from '../../utils/logger.js';
+import { validateInput } from '../../middleware/security.js';
+import { adminSchemas } from '../../utils/validation.js';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
 // 가드레일 목록
 router.get(

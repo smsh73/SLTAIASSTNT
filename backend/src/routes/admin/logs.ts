@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest, requireAdmin } from '../../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from '../../utils/database.js';
 import { createLogger } from '../../utils/logger.js';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
 // 로그 조회
 router.get(

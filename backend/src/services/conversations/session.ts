@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
+import { getPrismaClient } from '../../utils/database.js';
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 const logger = createLogger({
   screenName: 'Conversations',
   callerFunction: 'SessionManager',

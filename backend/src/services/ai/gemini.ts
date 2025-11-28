@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
 import { decrypt } from '../../utils/encryption.js';
+import { getPrismaClient } from '../../utils/database.js';
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 const logger = createLogger({
   screenName: 'AI',
   callerFunction: 'GeminiClient',

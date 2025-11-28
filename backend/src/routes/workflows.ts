@@ -2,16 +2,48 @@ import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import { createWorkflowPlan } from '../services/workflow/planner.js';
 import { executeWorkflow } from '../services/workflow/engine.js';
-import { PrismaClient } from '@prisma/client';
+import { getPrismaClient } from '../utils/database.js';
 import { createLogger } from '../utils/logger.js';
+import { validateInput } from '../middleware/security.js';
+import { workflowSchemas } from '../utils/validation.js';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
+/**
+ * @swagger
+ * /api/workflows:
+ *   post:
+ *     tags: [Workflows]
+ *     summary: 워크플로우 생성
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - goal
+ *             properties:
+ *               goal:
+ *                 type: string
+ *               context:
+ *                 type: string
+ *               conversationId:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: 워크플로우 생성 성공
+ *       400:
+ *         description: 잘못된 요청
+ */
 // 워크플로우 생성
 router.post(
   '/',
   authenticateToken,
+  validateInput(workflowSchemas.create),
   async (req: AuthRequest, res: Response) => {
     const logger = createLogger({
       screenName: 'Workflow',

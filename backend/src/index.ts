@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { logger } from './utils/logger.js';
 import { configureCORS, securityHeaders } from './middleware/security.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
+import { metricsMiddleware } from './middleware/metrics.js';
 
 dotenv.config();
 
@@ -15,6 +16,9 @@ app.use(securityHeaders);
 app.use(configureCORS());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// 메트릭 미들웨어
+app.use(metricsMiddleware);
 
 // Rate limiting
 app.use('/api/', createRateLimiter({
@@ -61,6 +65,7 @@ import conversationRoutes from './routes/conversations.js';
 import logRoutes from './routes/logs.js';
 import adminRoutes from './routes/admin/index.js';
 import multimodalRoutes from './routes/multimodal.js';
+import metricsRoutes from './routes/metrics.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/documents', documentRoutes);
@@ -71,6 +76,7 @@ app.use('/api/conversations', conversationRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/multimodal', multimodalRoutes);
+app.use('/metrics', metricsRoutes);
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, {

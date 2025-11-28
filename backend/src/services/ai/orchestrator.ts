@@ -2,6 +2,7 @@ import { routeAndChat, ChatMessage, RoutingResult } from './router.js';
 import { createLogger } from '../../utils/logger.js';
 import { getCircuitBreaker } from './circuitBreaker.js';
 import { getCache, setCache, CACHE_PREFIXES } from '../../utils/cache.js';
+import { recordAIRequest } from '../../utils/metrics.js';
 
 const logger = createLogger({
   screenName: 'AI',
@@ -18,6 +19,8 @@ export async function orchestrateAI(
   userPrompt: string,
   options?: OrchestrationOptions
 ): Promise<string | null> {
+  const startTime = Date.now();
+  
   try {
     // 캐시 키 생성 (프롬프트 기반)
     const cacheKey = `orchestrate:${Buffer.from(userPrompt).toString('base64').substring(0, 50)}`;
@@ -75,6 +78,11 @@ export async function orchestrateAI(
               provider,
               logType: 'success',
             });
+            
+            // 메트릭 기록
+            const duration = Date.now() - startTime;
+            recordAIRequest(provider, 'success', duration);
+            
             return response;
           }
         } catch (providerError) {
@@ -91,6 +99,11 @@ export async function orchestrateAI(
       logger.error('All providers failed', {
         logType: 'error',
       });
+      
+      // 메트릭 기록
+      const duration = Date.now() - startTime;
+      recordAIRequest('unknown', 'error', duration);
+      
       return null;
     }
 
@@ -106,6 +119,10 @@ export async function orchestrateAI(
         prefix: CACHE_PREFIXES.API_RESPONSE,
         ttl: 3600, // 1시간
       });
+      
+      // 메트릭 기록
+      const duration = Date.now() - startTime;
+      recordAIRequest(result.provider, 'success', duration);
     }
 
     return result.response;
@@ -114,6 +131,11 @@ export async function orchestrateAI(
       error: error instanceof Error ? error.message : 'Unknown error',
       logType: 'error',
     });
+    
+    // 메트릭 기록
+    const duration = Date.now() - startTime;
+    recordAIRequest('unknown', 'error', duration);
+    
     return null;
   }
 }

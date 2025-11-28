@@ -1,4 +1,5 @@
 import { createLogger } from '../../utils/logger.js';
+import { updateCircuitBreakerState } from '../../utils/metrics.js';
 
 const logger = createLogger({
   screenName: 'AI',
@@ -41,6 +42,7 @@ export class CircuitBreaker {
       if (Date.now() - this.lastFailureTime >= this.options.resetTimeout) {
         this.state = CircuitState.HALF_OPEN;
         this.successCount = 0;
+        updateCircuitBreakerState('unknown', 'half-open');
         logger.info('Circuit breaker entering half-open state', {
           logType: 'info',
         });
@@ -87,6 +89,7 @@ export class CircuitBreaker {
       // 반열림 상태에서 성공이 연속으로 발생하면 닫힘 상태로 전환
       if (this.successCount >= 2) {
         this.state = CircuitState.CLOSED;
+        updateCircuitBreakerState('unknown', 'closed');
         logger.info('Circuit breaker closed after successful recovery', {
           logType: 'success',
         });
@@ -101,12 +104,14 @@ export class CircuitBreaker {
     if (this.state === CircuitState.HALF_OPEN) {
       // 반열림 상태에서 실패하면 다시 열림 상태로
       this.state = CircuitState.OPEN;
+      updateCircuitBreakerState('unknown', 'open');
       logger.warning('Circuit breaker reopened after failure in half-open state', {
         logType: 'warning',
       });
     } else if (this.failureCount >= this.options.failureThreshold) {
       // 실패 임계값 초과 시 열림 상태로
       this.state = CircuitState.OPEN;
+      updateCircuitBreakerState('unknown', 'open');
       logger.error('Circuit breaker opened due to failure threshold', {
         failureCount: this.failureCount,
         threshold: this.options.failureThreshold,

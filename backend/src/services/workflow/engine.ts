@@ -6,6 +6,8 @@ import { executePythonCode } from '../code/executor.js';
 import { generateTable } from '../tables/generator.js';
 import { generateResearchReport } from '../research/reportGenerator.js';
 import { generatePythonCode } from '../code/generator.js';
+import { recordWorkflow } from '../../utils/metrics.js';
+import { notificationManager } from '../notifications/manager.js';
 
 const prisma = new PrismaClient();
 const logger = createLogger({

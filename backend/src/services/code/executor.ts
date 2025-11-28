@@ -2,6 +2,7 @@ import Docker from 'dockerode';
 import { createLogger } from '../../utils/logger.js';
 import { validateCode } from './validator.js';
 import { validateCodeWithAST } from './astValidator.js';
+import { recordCodeExecution } from '../../utils/metrics.js';
 
 const logger = createLogger({
   screenName: 'Code',
@@ -160,6 +161,13 @@ export async function executePythonCode(
         }
 
         const executionTime = Date.now() - startTime;
+
+        // 메트릭 기록
+        recordCodeExecution(
+          'python',
+          errorOutput.length > 0 ? 'error' : 'success',
+          executionTime
+        );
 
         logger.success('Code execution completed', {
           executionTime,

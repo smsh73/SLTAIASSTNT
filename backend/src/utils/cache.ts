@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import { createLogger } from './logger.js';
+import { recordCacheHit, recordCacheMiss } from './metrics.js';
 
 const logger = createLogger({
   screenName: 'Cache',
@@ -113,11 +114,14 @@ export async function getCache<T>(
     const cached = await redis.get(cacheKey);
     
     if (!cached) {
+      recordCacheMiss(options.prefix || 'default');
       return null;
     }
 
     const parsed = JSON.parse(cached) as T;
 
+    recordCacheHit(options.prefix || 'default');
+    
     logger.debug('Cache hit', {
       key: cacheKey,
       logType: 'success',

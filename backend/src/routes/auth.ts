@@ -10,6 +10,39 @@ import { getPrismaClient } from '../utils/database.js';
 const router = Router();
 const prisma = getPrismaClient();
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 사용자 회원가입
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - name
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: 회원가입 성공
+ *       400:
+ *         description: 잘못된 요청
+ *       500:
+ *         description: 서버 오류
+ */
 // Register
 router.post('/register', validateInput(authSchemas.register), async (req: Request, res: Response) => {
   const logger = createLogger({
@@ -82,6 +115,42 @@ router.post('/register', validateInput(authSchemas.register), async (req: Reques
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: 사용자 로그인
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       401:
+ *         description: 인증 실패
+ */
 // Login
 router.post('/login', validateInput(authSchemas.login), async (req: Request, res: Response) => {
   const logger = createLogger({

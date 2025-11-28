@@ -66,6 +66,8 @@ import logRoutes from './routes/logs.js';
 import adminRoutes from './routes/admin/index.js';
 import multimodalRoutes from './routes/multimodal.js';
 import metricsRoutes from './routes/metrics.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './utils/swagger.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/documents', documentRoutes);
@@ -77,6 +79,9 @@ app.use('/api/logs', logRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/multimodal', multimodalRoutes);
 app.use('/metrics', metricsRoutes);
+
+// Swagger API 문서
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, {

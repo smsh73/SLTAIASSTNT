@@ -12,6 +12,33 @@ const prisma = new PrismaClient();
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/ai/prompt-suggestions:
+ *   post:
+ *     tags: [AI]
+ *     summary: 프롬프트 제안 생성
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - words
+ *             properties:
+ *               words:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: 프롬프트 제안 목록
+ *       401:
+ *         description: 인증 필요
+ */
 // 프롬프트 제안
 router.post(
   '/prompt-suggestions',
@@ -60,6 +87,33 @@ router.post(
   }
 );
 
+/**
+ * @swagger
+ * /api/ai/chat:
+ *   post:
+ *     tags: [AI]
+ *     summary: AI 채팅
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *             properties:
+ *               message:
+ *                 type: string
+ *               conversationId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: AI 응답
+ *       401:
+ *         description: 인증 필요
+ */
 // 채팅
 router.post(
   '/chat',

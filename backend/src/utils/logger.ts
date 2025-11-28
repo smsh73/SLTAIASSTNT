@@ -1,7 +1,4 @@
 import winston from 'winston';
-import { getPrismaClient } from './database.js';
-
-const prisma = getPrismaClient();
 
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -46,15 +43,24 @@ interface LogData {
   message?: string;
   errorCode?: string;
   metadata?: Record<string, any>;
-  // 추가 필드들 (metadata에 저장)
   [key: string]: any;
+}
+
+let prismaClient: any = null;
+
+async function getPrisma() {
+  if (!prismaClient) {
+    const { PrismaClient } = await import('@prisma/client');
+    prismaClient = new PrismaClient();
+  }
+  return prismaClient;
 }
 
 export async function logToDatabase(data: LogData): Promise<void> {
   try {
-    // 비동기로 로깅 (블로킹 방지)
     setImmediate(async () => {
       try {
+        const prisma = await getPrisma();
         await prisma.log.create({
           data: {
             userId: data.userId,
@@ -65,18 +71,16 @@ export async function logToDatabase(data: LogData): Promise<void> {
             calledApi: data.calledApi,
             backendApiUrl: data.backendApiUrl,
             logType: data.logType,
-            message: data.message?.substring(0, 5000), // 메시지 길이 제한
+            message: data.message?.substring(0, 5000),
             errorCode: data.errorCode,
             metadata: data.metadata || {},
           },
         });
       } catch (dbError) {
-        // 데이터베이스 로깅 실패는 콘솔에만 기록 (무한 루프 방지)
         console.error('Failed to log to database:', dbError);
       }
     });
   } catch (error) {
-    // 로깅 실패는 무시 (시스템 안정성 우선)
     console.error('Failed to queue log:', error);
   }
 }
@@ -139,4 +143,3 @@ export function createLogger(context: {
     },
   };
 }
-

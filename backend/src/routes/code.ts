@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { validateInput } from '../middleware/security.js';
 import {
   generatePythonCode,
   generateNotebook,
@@ -9,6 +10,7 @@ import {
   executeNotebook,
 } from '../services/code/executor.js';
 import { createLogger } from '../utils/logger.js';
+import { codeSchemas } from '../utils/validation.js';
 
 const router = Router();
 

@@ -12,3 +12,40 @@ JWT_SECRET = "bbmH4xN4rDy3VBwHZd63GW1bCId/nmbA/2jL7rh3+7EwQ2LZJ5qEpAELnQ3Mk6eO"
 ENCRYPTION_MASTER_KEY = "0e2cc39bc6f8d673259f3a12e84d12b08a2bce3d32612300ce1ea703ad96c29c"
 PORT = "3001"
 NODE_ENV = "development"
+ALLOWED_ORIGINS = "http://localhost:5000,http://localhost:3000,https://*.replit.dev,https://*.repl.co"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 44637
+externalPort = 3000

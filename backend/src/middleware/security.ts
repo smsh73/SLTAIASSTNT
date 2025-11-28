@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger({
@@ -49,7 +50,7 @@ export function securityHeaders(
 }
 
 // 입력 검증 미들웨어
-export function validateInput(schema: any) {
+export function validateInput(schema: z.ZodSchema) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       // Zod 또는 Joi 스키마로 검증

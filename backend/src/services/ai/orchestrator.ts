@@ -21,14 +21,17 @@ export async function orchestrateAI(
     const result = await routeAndChat(messages, userPrompt);
 
     if (!result) {
-      // 폴백 프로바이더 시도
-      if (options?.fallbackProviders && options.fallbackProviders.length > 0) {
-        logger.info('Trying fallback providers', {
-          fallbacks: options.fallbackProviders,
-          logType: 'info',
-        });
+      // 폴백 프로바이더 시도 (자동 폴백)
+      const allProviders: Array<'openai' | 'claude' | 'gemini' | 'perplexity' | 'luxia'> = 
+        options?.fallbackProviders || ['openai', 'claude', 'gemini', 'perplexity', 'luxia'];
+      
+      logger.info('Trying fallback providers', {
+        fallbacks: allProviders,
+        logType: 'info',
+      });
 
-        for (const provider of options.fallbackProviders) {
+      for (const provider of allProviders) {
+        try {
           let response: string | null = null;
 
           switch (provider) {
@@ -56,6 +59,14 @@ export async function orchestrateAI(
             });
             return response;
           }
+        } catch (providerError) {
+          logger.warning('Fallback provider failed', {
+            provider,
+            error: providerError instanceof Error ? providerError.message : 'Unknown error',
+            logType: 'warning',
+          });
+          // 다음 프로바이더 시도
+          continue;
         }
       }
 

@@ -2,15 +2,31 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { logger } from './utils/logger.js';
+import { configureCORS, securityHeaders } from './middleware/security.js';
+import { createRateLimiter } from './middleware/rateLimiter.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// 보안 미들웨어
+app.use(securityHeaders);
+app.use(configureCORS());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Rate limiting
+app.use('/api/', createRateLimiter({
+  windowMs: 15 * 60 * 1000, // 15분
+  maxRequests: 100, // 기본 제한
+}));
+
+// AI API는 더 엄격한 제한
+app.use('/api/ai/', createRateLimiter({
+  windowMs: 60 * 1000, // 1분
+  maxRequests: 20,
+}));
 
 // Health check
 app.get('/health', (req, res) => {

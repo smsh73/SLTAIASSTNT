@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest, requireAdmin } from '../../middleware/auth.js';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
+import { encrypt, decrypt } from '../../utils/encryption.js';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -77,10 +78,13 @@ router.post(
         return;
       }
 
+      // API 키 암호화
+      const encryptedApiKey = encrypt(apiKey);
+
       const newApiKey = await prisma.apiKey.create({
         data: {
           provider,
-          apiKey,
+          apiKey: encryptedApiKey,
           weight: weight || 1.0,
           isActive: isActive !== undefined ? isActive : true,
           createdBy: req.userId,
@@ -132,7 +136,10 @@ router.put(
       const { apiKey, weight, isActive } = req.body;
 
       const updateData: any = {};
-      if (apiKey !== undefined) updateData.apiKey = apiKey;
+      if (apiKey !== undefined) {
+        // API 키 암호화
+        updateData.apiKey = encrypt(apiKey);
+      }
       if (weight !== undefined) updateData.weight = weight;
       if (isActive !== undefined) updateData.isActive = isActive;
 

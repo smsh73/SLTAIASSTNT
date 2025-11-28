@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
+import { decrypt } from '../../utils/encryption.js';
 
 const prisma = new PrismaClient();
 const logger = createLogger({
@@ -31,8 +32,11 @@ export async function getClaudeClient(): Promise<Anthropic | null> {
       return null;
     }
 
+    // API 키 복호화
+    const decryptedApiKey = decrypt(apiKey.apiKey);
+
     client = new Anthropic({
-      apiKey: apiKey.apiKey,
+      apiKey: decryptedApiKey,
     });
 
     return client;

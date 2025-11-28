@@ -46,14 +46,43 @@ export async function validatePrompt(prompt: string): Promise<ValidationResult> 
             };
 
           case 'modify':
-            // 프롬프트 수정 (간단한 구현)
-            const modifiedPrompt = prompt.replace(pattern, '');
-            return {
-              isValid: true,
-              action: 'modify',
-              message: `프롬프트가 수정되었습니다: ${guardrail.name}`,
-              modifiedPrompt,
-            };
+            // 프롬프트 수정 (AI 기반 개선)
+            try {
+              const { orchestrateAI } = await import('../ai/orchestrator.js');
+              const modificationPrompt = `다음 프롬프트에서 부적절한 내용을 제거하고 적절하게 수정해주세요:\n\n${prompt}\n\n원본 프롬프트의 의도는 유지하되, 부적절한 부분만 제거하거나 대체해주세요.`;
+              
+              const modified = await orchestrateAI(
+                [
+                  {
+                    role: 'system',
+                    content: '당신은 프롬프트 수정 전문가입니다. 부적절한 내용을 제거하고 적절하게 수정합니다.',
+                  },
+                  {
+                    role: 'user',
+                    content: modificationPrompt,
+                  },
+                ],
+                modificationPrompt
+              );
+
+              const modifiedPrompt = modified || prompt.replace(pattern, '');
+              
+              return {
+                isValid: true,
+                action: 'modify',
+                message: `프롬프트가 수정되었습니다: ${guardrail.name}`,
+                modifiedPrompt,
+              };
+            } catch (error) {
+              // AI 수정 실패 시 단순 패턴 제거
+              const modifiedPrompt = prompt.replace(pattern, '');
+              return {
+                isValid: true,
+                action: 'modify',
+                message: `프롬프트가 수정되었습니다: ${guardrail.name}`,
+                modifiedPrompt,
+              };
+            }
 
           default:
             break;

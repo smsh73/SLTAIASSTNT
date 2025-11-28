@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
+import { decrypt } from '../../utils/encryption.js';
 
 const prisma = new PrismaClient();
 const logger = createLogger({
@@ -27,7 +28,8 @@ export async function getLuxiaApiKey(): Promise<string | null> {
       return null;
     }
 
-    return apiKey.apiKey;
+    // API 키 복호화
+    return decrypt(apiKey.apiKey);
   } catch (error) {
     logger.error('Failed to get Luxia API key', {
       error: error instanceof Error ? error.message : 'Unknown error',

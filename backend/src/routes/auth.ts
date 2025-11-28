@@ -4,12 +4,14 @@ import { PrismaClient } from '@prisma/client';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { createLogger } from '../utils/logger.js';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { validateInput } from '../middleware/security.js';
+import { authSchemas } from '../utils/validation.js';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Register
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', validateInput(authSchemas.register), async (req: Request, res: Response) => {
   const logger = createLogger({
     screenName: 'Auth',
     callerFunction: 'register',
@@ -81,7 +83,7 @@ router.post('/register', async (req: Request, res: Response) => {
 });
 
 // Login
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', validateInput(authSchemas.login), async (req: Request, res: Response) => {
   const logger = createLogger({
     screenName: 'Auth',
     callerFunction: 'login',

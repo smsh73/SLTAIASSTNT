@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
+import { decrypt } from '../../utils/encryption.js';
 
 const prisma = new PrismaClient();
 const logger = createLogger({
@@ -31,8 +32,11 @@ export async function getOpenAIClient(): Promise<OpenAI | null> {
       return null;
     }
 
+    // API 키 복호화
+    const decryptedApiKey = decrypt(apiKey.apiKey);
+
     client = new OpenAI({
-      apiKey: apiKey.apiKey,
+      apiKey: decryptedApiKey,
     });
 
     return client;

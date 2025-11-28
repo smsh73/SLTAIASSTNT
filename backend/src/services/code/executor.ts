@@ -43,7 +43,7 @@ export async function executePythonCode(
       };
     }
 
-    // 컨테이너 생성 및 실행
+    // 컨테이너 생성 및 실행 (보안 강화)
     const container = await docker.createContainer({
       Image: CONTAINER_IMAGE,
       Cmd: ['python', '-c', code],
@@ -53,9 +53,23 @@ export async function executePythonCode(
       HostConfig: {
         AutoRemove: true,
         Memory: 512 * 1024 * 1024, // 512MB
+        MemorySwap: 512 * 1024 * 1024, // Swap 비활성화
         CpuQuota: 50000, // 50% CPU
+        CpuPeriod: 100000,
+        CpuShares: 512,
         NetworkMode: 'none', // 네트워크 비활성화
+        ReadonlyRootfs: true, // 읽기 전용 루트 파일 시스템
+        CapDrop: ['ALL'], // 모든 권한 제거
+        CapAdd: [], // 권한 추가 없음
+        SecurityOpt: ['no-new-privileges:true'],
+        PidsLimit: 50, // 프로세스 수 제한
+        Ulimits: [
+          { Name: 'nofile', Soft: 1024, Hard: 1024 },
+          { Name: 'nproc', Soft: 50, Hard: 50 },
+        ],
       },
+      WorkingDir: '/tmp',
+      User: '1000:1000', // 비특권 사용자
     });
 
     await container.start();

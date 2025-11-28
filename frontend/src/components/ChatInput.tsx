@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { usePromptSuggestion } from '../hooks/usePromptSuggestion';
 
 interface ChatInputProps {
@@ -17,22 +17,37 @@ export default function ChatInput({
   loading,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { getSuggestions } = usePromptSuggestion();
 
-  useEffect(() => {
-    if (value) {
-      const wordArray = value.split(/\s+/).filter((w) => w.length > 0);
-      
-      // 단어 단위로 프롬프트 추천 요청
-      if (wordArray.length > 0) {
-        getSuggestions(wordArray).then((suggestions) => {
-          onSuggestionsChange(suggestions);
-        });
-      }
-    } else {
-      onSuggestionsChange([]);
+  const debouncedGetSuggestions = useCallback((inputValue: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
-  }, [value, getSuggestions, onSuggestionsChange]);
+    
+    debounceRef.current = setTimeout(() => {
+      if (inputValue) {
+        const wordArray = inputValue.split(/\s+/).filter((w) => w.length > 0);
+        if (wordArray.length > 0) {
+          getSuggestions(wordArray).then((suggestions) => {
+            onSuggestionsChange(suggestions);
+          });
+        }
+      } else {
+        onSuggestionsChange([]);
+      }
+    }, 500);
+  }, [getSuggestions, onSuggestionsChange]);
+
+  useEffect(() => {
+    debouncedGetSuggestions(value);
+    
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [value, debouncedGetSuggestions]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

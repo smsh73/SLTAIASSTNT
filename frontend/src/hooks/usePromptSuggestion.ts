@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 export function usePromptSuggestion() {
-  const [cache, setCache] = useState<Map<string, string[]>>(new Map());
+  const cacheRef = useRef<Map<string, string[]>>(new Map());
   const { token } = useAuthStore();
 
   const getSuggestions = useCallback(
@@ -11,8 +11,8 @@ export function usePromptSuggestion() {
       if (words.length === 0) return [];
 
       const key = words.join(' ');
-      if (cache.has(key)) {
-        return cache.get(key) || [];
+      if (cacheRef.current.has(key)) {
+        return cacheRef.current.get(key) || [];
       }
 
       try {
@@ -25,14 +25,14 @@ export function usePromptSuggestion() {
         );
 
         const suggestions = response.data.suggestions || [];
-        setCache((prev) => new Map(prev).set(key, suggestions));
+        cacheRef.current.set(key, suggestions);
         return suggestions;
       } catch (error) {
         console.error('Failed to get prompt suggestions', error);
         return [];
       }
     },
-    [token, cache]
+    [token]
   );
 
   return { getSuggestions };

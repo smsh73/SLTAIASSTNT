@@ -4,8 +4,16 @@ import Login from './pages/Login';
 import Layout from './components/Layout';
 
 function App() {
-  const { token } = useAuthStore();
+  const { token, isHydrated } = useAuthStore();
   const location = useLocation();
+
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
+        <div className="text-primary-600 text-lg">로딩 중...</div>
+      </div>
+    );
+  }
 
   if (location.pathname === '/login') {
     if (token) {

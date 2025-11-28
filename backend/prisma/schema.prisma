@@ -1,5 +1,7 @@
+// Prisma 스키마 - 200% 완성도 버전
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -7,6 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 사용자 테이블
 model User {
   id           Int       @id @default(autoincrement())
   email        String    @unique @db.VarChar(255)
@@ -14,130 +17,181 @@ model User {
   name         String    @db.VarChar(255)
   role         String    @default("user") @db.VarChar(50)
   isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   conversations Conversation[]
-  documents      Document[]
-  apiKeys        ApiKey[]      @relation("CreatedBy")
-  guardrails     Guardrail[]   @relation("CreatedBy")
-  workflows      Workflow[]
-  logs           Log[]
+  messages      Message[]
+  documents     Document[]
+  apiKeys       ApiKey[]      @relation("CreatedBy")
+  guardrails    Guardrail[]   @relation("CreatedBy")
+  workflows     Workflow[]
+  logs          Log[]
+  sessions      Session[]
 
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
   @@map("users")
 }
 
+// 대화 세션 테이블
 model Conversation {
-  id        Int       @id @default(autoincrement())
-  userId    Int       @map("user_id")
-  title     String?   @db.VarChar(500)
-  topic     String?   @db.VarChar(255)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  id          Int       @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  title       String?  @db.VarChar(500)
+  topic       String?  @db.VarChar(255)
+  status      String   @default("active") @db.VarChar(50)
+  metadata    Json?    @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages  Message[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
   documents Document[]
   workflows Workflow[]
 
   @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([topic])
+  @@fulltext([title, topic])
   @@map("conversations")
 }
 
+// 메시지 테이블
 model Message {
   id             Int       @id @default(autoincrement())
   conversationId Int       @map("conversation_id")
+  userId         Int       @map("user_id")
   role           String    @db.VarChar(50)
   content        String    @db.Text
-  metadata       Json?
+  metadata       Json?     @default("{}")
+  tokens         Int?      @default(0)
+  model          String?   @db.VarChar(100)
+  provider       String?   @db.VarChar(50)
   createdAt      DateTime  @default(now()) @map("created_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
+  @@index([userId])
+  @@index([role])
+  @@index([createdAt])
+  @@index([provider])
+  @@fulltext([content])
   @@map("messages")
 }
 
+// 문서 테이블
 model Document {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @map("user_id")
-  conversationId  Int?      @map("conversation_id")
-  filename        String    @db.VarChar(500)
-  originalFilename String   @map("original_filename") @db.VarChar(500)
-  fileType        String?   @map("file_type") @db.VarChar(100)
-  fileSize        BigInt?   @map("file_size")
-  s3Key           String    @map("s3_key") @db.VarChar(1000)
-  s3Url           String?   @map("s3_url") @db.VarChar(1000)
-  metadata        Json?
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  conversationId Int?      @map("conversation_id")
+  name           String    @db.VarChar(500)
+  type           String    @db.VarChar(50)
+  size           BigInt    @default(0)
+  s3Key          String    @map("s3_key") @db.VarChar(1000)
+  s3Url          String?   @map("s3_url") @db.VarChar(2000)
+  metadata       Json?     @default("{}")
+  status         String    @default("uploaded") @db.VarChar(50)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([conversationId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@fulltext([name])
   @@map("documents")
 }
 
+// API 키 테이블
 model ApiKey {
   id        Int       @id @default(autoincrement())
   provider  String    @db.VarChar(50)
   apiKey    String    @map("api_key") @db.Text
   isActive  Boolean   @default(true) @map("is_active")
   weight    Decimal   @default(1.0) @db.Decimal(5, 2)
-  metadata  Json?
+  metadata  Json?     @default("{}")
   createdBy Int?      @map("created_by")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   creator User? @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
+  @@unique([provider, createdBy])
+  @@index([provider])
+  @@index([isActive])
+  @@index([weight])
+  @@index([createdBy])
   @@map("api_keys")
 }
 
+// 워크플로우 테이블
 model Workflow {
-  id            Int       @id @default(autoincrement())
-  userId        Int       @map("user_id")
-  conversationId Int?     @map("conversation_id")
-  name          String    @db.VarChar(255)
-  plan          Json
-  status        String    @default("pending") @db.VarChar(50)
-  currentStep   Int       @default(0) @map("current_step")
-  results       Json?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  conversationId Int?      @map("conversation_id")
+  name           String    @db.VarChar(255)
+  plan           Json
+  status         String    @default("pending") @db.VarChar(50)
+  currentStep    Int       @default(0) @map("current_step")
+  results        Json?     @default("{}")
+  errors         Json?     @default("{}")
+  startedAt      DateTime? @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([conversationId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([startedAt])
+  @@fulltext([name])
   @@map("workflows")
 }
 
+// 로그 테이블
 model Log {
   id            Int       @id @default(autoincrement())
   userId        Int?      @map("user_id")
   screenName    String?   @map("screen_name") @db.VarChar(255)
   screenUrl     String?   @map("screen_url") @db.VarChar(1000)
-  callerFunction String?  @map("caller_function") @db.VarChar(255)
+  callerFunction String? @map("caller_function") @db.VarChar(255)
   buttonId      String?   @map("button_id") @db.VarChar(255)
   calledApi     String?   @map("called_api") @db.VarChar(255)
   backendApiUrl String?   @map("backend_api_url") @db.VarChar(1000)
   logType       String    @map("log_type") @db.VarChar(50)
   message       String?   @db.Text
   errorCode     String?   @map("error_code") @db.VarChar(100)
-  metadata      Json?
+  metadata      Json?     @default("{}")
   createdAt     DateTime  @default(now()) @map("created_at")
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([logType])
   @@index([createdAt])
+  @@index([screenName])
+  @@index([backendApiUrl])
+  @@index([callerFunction])
+  @@fulltext([message])
   @@map("logs")
 }
 
+// 가드레일 테이블
 model Guardrail {
   id          Int       @id @default(autoincrement())
   name        String    @db.VarChar(255)
@@ -145,12 +199,115 @@ model Guardrail {
   pattern     String    @db.Text
   action      String    @default("block") @db.VarChar(50)
   isActive    Boolean   @default(true) @map("is_active")
+  priority    Int       @default(0)
   createdBy   Int?      @map("created_by")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   creator User? @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
 
+  @@index([isActive])
+  @@index([priority])
+  @@index([action])
+  @@index([createdBy])
+  @@fulltext([name, description])
   @@map("guardrails")
 }
 
+// 세션 테이블 (추가)
+model Session {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  token        String    @unique @db.VarChar(500)
+  refreshToken String?   @map("refresh_token") @db.VarChar(500)
+  ipAddress    String?   @map("ip_address") @db.VarChar(45)
+  userAgent    String?   @map("user_agent") @db.VarChar(500)
+  expiresAt    DateTime  @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@map("sessions")
+}
+
+// MCP 연결 테이블 (추가)
+model MCPConnection {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(255)
+  serverUrl   String    @map("server_url") @db.VarChar(1000)
+  serverType  String    @map("server_type") @db.VarChar(50)
+  isActive    Boolean   @default(true) @map("is_active")
+  metadata    Json?     @default("{}")
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@index([serverType])
+  @@index([lastUsedAt])
+  @@fulltext([name])
+  @@map("mcp_connections")
+}
+
+// 워크플로우 실행 이력 테이블 (추가)
+model WorkflowExecution {
+  id          Int       @id @default(autoincrement())
+  workflowId  Int       @map("workflow_id")
+  stepId      String    @map("step_id") @db.VarChar(255)
+  status      String    @db.VarChar(50)
+  input       Json?     @default("{}")
+  output      Json?     @default("{}")
+  error       String?   @db.Text
+  duration    Int?      @default(0)
+  startedAt   DateTime  @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@index([workflowId])
+  @@index([stepId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("workflow_executions")
+}
+
+// 캐시 메타데이터 테이블 (추가)
+model CacheMetadata {
+  id         Int       @id @default(autoincrement())
+  key        String    @unique @db.VarChar(500)
+  prefix     String    @db.VarChar(100)
+  ttl        Int       @default(3600)
+  hitCount   Int       @default(0) @map("hit_count")
+  missCount  Int       @default(0) @map("miss_count")
+  lastHitAt  DateTime? @map("last_hit_at")
+  lastMissAt DateTime? @map("last_miss_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@index([prefix])
+  @@index([lastHitAt])
+  @@index([createdAt])
+  @@map("cache_metadata")
+}
+
+// AI 요청 통계 테이블 (추가)
+model AIRequestStats {
+  id          Int       @id @default(autoincrement())
+  provider    String    @db.VarChar(50)
+  date        DateTime  @db.Date
+  requestCount Int      @default(0) @map("request_count")
+  successCount Int      @default(0) @map("success_count")
+  errorCount   Int      @default(0) @map("error_count")
+  avgDuration  Decimal? @map("avg_duration") @db.Decimal(10, 3)
+  totalTokens  BigInt?  @default(0) @map("total_tokens")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@unique([provider, date])
+  @@index([provider])
+  @@index([date])
+  @@map("ai_request_stats")
+}

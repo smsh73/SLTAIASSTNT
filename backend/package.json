@@ -9,7 +9,15 @@
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "db:init": "bash ../database/scripts/init-db.sh",
+    "db:seed": "bash ../database/scripts/init-db.sh --seed",
+    "db:backup": "bash ../database/scripts/backup-db.sh",
+    "db:optimize": "bash ../database/scripts/optimize-db.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.9.1",

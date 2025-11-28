@@ -63,6 +63,13 @@ Access Swagger API docs at `/api-docs` when the backend is running.
 
 ## Recent Changes
 
+- **2025-11-28**: Enhanced Chat Features
+  - Added AI provider selection dropdown (OpenAI, Claude, Gemini, Perplexity, Luxia)
+  - Implemented file upload UI with document context support
+  - Added Mix of Agents mode for comparing responses from multiple AI providers
+  - Added `/api/ai/providers` endpoint for retrieving active AI providers
+  - Updated streaming orchestrator to support provider selection and mix mode
+
 - **2025-11-28**: Initial Replit migration
   - Configured Vite for Replit (port 5000, allow all hosts)
   - Changed backend port to 3001 to avoid conflict

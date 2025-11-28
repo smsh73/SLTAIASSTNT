@@ -1,11 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { logger } from './utils/logger.js';
 import { configureCORS, securityHeaders } from './middleware/security.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
 import { metricsMiddleware } from './middleware/metrics.js';
 import { validateEnvironment } from './utils/env-validator.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 환경 변수 검증 (애플리케이션 시작 전)
 try {
@@ -92,9 +97,25 @@ app.use('/metrics', metricsRoutes);
 // Swagger API 문서
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../../frontend/dist');
+  app.use(express.static(frontendBuildPath));
+  
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/metrics') || req.path.startsWith('/api-docs') || req.path === '/health') {
+      next();
+    } else {
+      res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    }
+  });
+}
+
 // 에러 핸들러 (모든 라우트 이후에 위치)
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-app.use(notFoundHandler);
+if (process.env.NODE_ENV !== 'production') {
+  app.use(notFoundHandler);
+}
 app.use(errorHandler);
 
 app.listen(PORT, () => {

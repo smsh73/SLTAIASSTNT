@@ -49,3 +49,8 @@ externalPort = 80
 [[ports]]
 localPort = 44637
 externalPort = 3000
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "cd backend && NODE_ENV=production PORT=5000 node dist/index.js"]
+build = ["bash", "-c", "cd frontend && npm run build && cd ../backend && npm run build"]

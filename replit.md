@@ -1,0 +1,72 @@
+# Saltlux AI Assistant
+
+## Overview
+
+A fullstack AI assistant application with a React + Vite frontend and Node.js + Express backend. The application provides AI chat capabilities, document management, code generation/execution, and workflow automation.
+
+## Project Structure
+
+```
+/
+├── frontend/           # React + Vite frontend (port 5000)
+│   ├── src/
+│   │   ├── components/ # UI components
+│   │   ├── pages/      # Page components
+│   │   ├── hooks/      # Custom React hooks
+│   │   ├── store/      # Zustand state management
+│   │   └── types/      # TypeScript types
+│   └── vite.config.ts  # Vite configuration
+├── backend/            # Node.js + Express backend (port 3001)
+│   ├── src/
+│   │   ├── routes/     # API routes
+│   │   ├── services/   # Business logic services
+│   │   ├── middleware/ # Express middleware
+│   │   └── utils/      # Utility functions
+│   └── prisma/         # Prisma ORM schema
+├── database/           # Database scripts and schema
+└── package.json        # Root package.json with concurrently
+```
+
+## Technology Stack
+
+- **Frontend**: React 18, Vite 5, TypeScript, TailwindCSS, Zustand
+- **Backend**: Node.js, Express, TypeScript, Prisma ORM
+- **Database**: PostgreSQL (Neon)
+- **AI Services**: OpenAI, Claude, Gemini, Perplexity (configurable)
+
+## Development
+
+Run the application:
+```bash
+npm run dev
+```
+
+This starts both frontend (port 5000) and backend (port 3001) concurrently.
+
+## Environment Variables
+
+### Required
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - JWT signing secret (min 32 characters)
+- `ENCRYPTION_MASTER_KEY` - 64-character hex string for encryption
+
+### Optional
+- `REDIS_URL` - Redis connection for caching
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME` - S3 storage
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` - Email notifications
+- `SLACK_WEBHOOK_URL` - Slack notifications
+- `ALLOWED_ORIGINS` - CORS allowed origins
+
+## API Documentation
+
+Access Swagger API docs at `/api-docs` when the backend is running.
+
+## Recent Changes
+
+- **2025-11-28**: Initial Replit migration
+  - Configured Vite for Replit (port 5000, allow all hosts)
+  - Changed backend port to 3001 to avoid conflict
+  - Fixed Prisma schema for PostgreSQL compatibility (removed MySQL-only features)
+  - Fixed circular dependency in logger/database modules
+  - Added missing imports in route files
+  - Set up deployment configuration

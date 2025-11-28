@@ -22,10 +22,7 @@ export default function Login() {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const data = isLogin ? { email, password } : { email, password, name };
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${endpoint}`,
-        data
-      );
+      const response = await axios.post(endpoint, data);
 
       setAuth(response.data.user, response.data.token);
       navigate('/');

@@ -37,7 +37,7 @@ export default function WorkflowMonitor({ workflowId }: WorkflowMonitorProps) {
   const fetchWorkflow = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/workflows/${workflowId}`,
+        `/api/workflows/${workflowId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

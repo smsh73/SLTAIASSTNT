@@ -23,7 +23,7 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/users`,
+        '/api/admin/users',
         {
           headers: { Authorization: `Bearer ${token}` },
         }

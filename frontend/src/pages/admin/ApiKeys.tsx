@@ -29,7 +29,7 @@ export default function ApiKeys() {
   const fetchApiKeys = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/api-keys`,
+        '/api/admin/api-keys',
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -46,7 +46,7 @@ export default function ApiKeys() {
     e.preventDefault();
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/api-keys`,
+        '/api/admin/api-keys',
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -70,7 +70,7 @@ export default function ApiKeys() {
 
     try {
       await axios.delete(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/api-keys/${id}`,
+        `/api/admin/api-keys/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

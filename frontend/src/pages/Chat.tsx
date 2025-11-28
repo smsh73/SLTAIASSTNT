@@ -35,7 +35,7 @@ export default function Chat() {
   const loadConversation = async (id: string) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations/${id}`,
+        `/api/conversations/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

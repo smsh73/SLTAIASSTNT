@@ -26,7 +26,7 @@ export default function LogMonitor() {
   const fetchLogs = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/logs/recent`,
+        '/api/logs/recent',
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { limit: 50 },

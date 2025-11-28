@@ -25,7 +25,7 @@ export default function ConversationList() {
   const fetchConversations = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/conversations`,
+        '/api/conversations',
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -23,7 +23,7 @@ export default function Logs() {
   const fetchLogs = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/logs`,
+        '/api/admin/logs',
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { limit: 100 },

@@ -30,7 +30,7 @@ export default function MultimodalInput({ onOutput }: MultimodalInputProps) {
       }
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/multimodal/process`,
+        '/api/multimodal/process',
         formData,
         {
           headers: {

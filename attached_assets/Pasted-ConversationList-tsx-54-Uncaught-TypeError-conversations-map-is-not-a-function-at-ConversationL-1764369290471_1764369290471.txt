@@ -1,0 +1,111 @@
+ConversationList.tsx:54 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=26ffa84c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=26ffa84c:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=26ffa84c:3733:39)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19765:15)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+ConversationList @ ConversationList.tsx:54
+renderWithHooks @ chunk-PJEEZAML.js?v=26ffa84c:11548
+updateFunctionComponent @ chunk-PJEEZAML.js?v=26ffa84c:14582
+beginWork @ chunk-PJEEZAML.js?v=26ffa84c:15924
+callCallback2 @ chunk-PJEEZAML.js?v=26ffa84c:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=26ffa84c:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=26ffa84c:3733
+beginWork$1 @ chunk-PJEEZAML.js?v=26ffa84c:19765
+performUnitOfWork @ chunk-PJEEZAML.js?v=26ffa84c:19198
+workLoopSync @ chunk-PJEEZAML.js?v=26ffa84c:19137
+renderRootSync @ chunk-PJEEZAML.js?v=26ffa84c:19116
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18678
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384Understand this error
+ConversationList.tsx:54 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=26ffa84c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=26ffa84c:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=26ffa84c:3733:39)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19765:15)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+ConversationList @ ConversationList.tsx:54
+renderWithHooks @ chunk-PJEEZAML.js?v=26ffa84c:11548
+updateFunctionComponent @ chunk-PJEEZAML.js?v=26ffa84c:14582
+beginWork @ chunk-PJEEZAML.js?v=26ffa84c:15924
+callCallback2 @ chunk-PJEEZAML.js?v=26ffa84c:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=26ffa84c:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=26ffa84c:3733
+beginWork$1 @ chunk-PJEEZAML.js?v=26ffa84c:19765
+performUnitOfWork @ chunk-PJEEZAML.js?v=26ffa84c:19198
+workLoopSync @ chunk-PJEEZAML.js?v=26ffa84c:19137
+renderRootSync @ chunk-PJEEZAML.js?v=26ffa84c:19116
+recoverFromConcurrentError @ chunk-PJEEZAML.js?v=26ffa84c:18736
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18684
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384Understand this error
+chunk-PJEEZAML.js?v=26ffa84c:14032 The above error occurred in the <ConversationList> component:
+
+    at ConversationList (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/ConversationList.tsx:24:45)
+    at div
+    at div
+    at Sidebar (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/Sidebar.tsx:24:41)
+    at div
+    at div
+    at Layout (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/Layout.tsx:28:20)
+    at RenderedRoute (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4108:5)
+    at Routes (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4578:5)
+    at App (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/App.tsx:24:33)
+    at Router (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4521:15)
+    at BrowserRouter (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:5267:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-PJEEZAML.js?v=26ffa84c:14032
+update.callback @ chunk-PJEEZAML.js?v=26ffa84c:14052
+callCallback @ chunk-PJEEZAML.js?v=26ffa84c:11248
+commitUpdateQueue @ chunk-PJEEZAML.js?v=26ffa84c:11265
+commitLayoutEffectOnFiber @ chunk-PJEEZAML.js?v=26ffa84c:17093
+commitLayoutMountEffects_complete @ chunk-PJEEZAML.js?v=26ffa84c:17980
+commitLayoutEffects_begin @ chunk-PJEEZAML.js?v=26ffa84c:17969
+commitLayoutEffects @ chunk-PJEEZAML.js?v=26ffa84c:17920
+commitRootImpl @ chunk-PJEEZAML.js?v=26ffa84c:19353
+commitRoot @ chunk-PJEEZAML.js?v=26ffa84c:19277
+finishConcurrentRender @ chunk-PJEEZAML.js?v=26ffa84c:18760
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18718
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384Understand this error
+chunk-PJEEZAML.js?v=26ffa84c:19413 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19753:22)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+    at renderRootSync (chunk-PJEEZAML.js?v=26ffa84c:19116:15)
+    at recoverFromConcurrentError (chunk-PJEEZAML.js?v=26ffa84c:18736:28)
+    at performConcurrentWorkOnRoot (chunk-PJEEZAML.js?v=26ffa84c:18684:30)
+ConversationList @ ConversationList.tsx:54
+renderWithHooks @ chunk-PJEEZAML.js?v=26ffa84c:11548
+updateFunctionComponent @ chunk-PJEEZAML.js?v=26ffa84c:14582
+beginWork @ chunk-PJEEZAML.js?v=26ffa84c:15924
+beginWork$1 @ chunk-PJEEZAML.js?v=26ffa84c:19753
+performUnitOfWork @ chunk-PJEEZAML.js?v=26ffa84c:19198
+workLoopSync @ chunk-PJEEZAML.js?v=26ffa84c:19137
+renderRootSync @ chunk-PJEEZAML.js?v=26ffa84c:19116
+recoverFromConcurrentError @ chunk-PJEEZAML.js?v=26ffa84c:18736
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18684
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384Understand this error
+t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev&size=32:1  GET https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev&size=32 404 (Not Found)Understand this error
+faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://5b8a76f6-3647-4092-a3a…:1  GET https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/&size=32 404 (Not Found)

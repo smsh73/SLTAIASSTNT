@@ -34,9 +34,11 @@ export default function ConversationList() {
           },
         }
       );
-      setConversations(response.data);
+      const data = response.data?.conversations || [];
+      setConversations(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch conversations', error);
+      setConversations([]);
     } finally {
       setLoading(false);
     }

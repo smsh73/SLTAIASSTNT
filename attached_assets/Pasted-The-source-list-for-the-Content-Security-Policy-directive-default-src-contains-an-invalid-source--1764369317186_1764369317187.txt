@@ -1,0 +1,395 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+SLTAIASSTNT:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+SLTAIASSTNT:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+SLTAIASSTNT:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+09f8e2986167d2b5.js:2 [Coframe] Replit Enterprise watcher loaded
+09f8e2986167d2b5.js:2 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+09f8e2986167d2b5.js:2 Download the Apollo DevTools for a better development experience: https://chrome.google.com/webstore/detail/apollo-client-developer-t/jdkknkkbebbapilgoeccciglkfbmbnfm
+09f8e2986167d2b5.js:2 [LaunchDarkly] LaunchDarkly client initialized
+Grammarly-check.js:1 [Violation] Permissions policy violation: unload is not allowed in this document.
+(anonymous) @ Grammarly-check.js:1
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+ed1e693c96a75807.js:2 Unrecognized feature: 'ambient-light-sensor'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'battery'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'execution-while-not-rendered'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'execution-while-out-of-viewport'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'layout-animations'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'legacy-image-formats'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'navigation-override'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'oversized-images'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'publickey-credentials'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'speaker-selection'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'unoptimized-images'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'unsized-media'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Unrecognized feature: 'pointer-lock'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Allow attribute will take precedence over 'allowfullscreen'.
+z @ ed1e693c96a75807.js:2
+ed1e693c96a75807.js:2 Allow attribute will take precedence over 'allowpaymentrequest'.
+z @ ed1e693c96a75807.js:2
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'battery'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'layout-animations'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'legacy-image-formats'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'navigation-override'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'oversized-images'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'publickey-credentials'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'speaker-selection'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'unoptimized-images'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'unsized-media'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2i%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/api/conversations:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/api/conversations:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev:3001/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev:3001/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+SLTAIASSTNT:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SLTAIASSTNT:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SLTAIASSTNT:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SLTAIASSTNT:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+react-router-dom.js?v=26ffa84c:4413 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=26ffa84c:4413
+react-router-dom.js?v=26ffa84c:4413 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=26ffa84c:4413
+main.tsx:12 Service Worker registered: ServiceWorkerRegistration
+ConversationList.tsx:54 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=26ffa84c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=26ffa84c:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=26ffa84c:3733:39)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19765:15)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+ConversationList.tsx:54 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=26ffa84c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=26ffa84c:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=26ffa84c:3733:39)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19765:15)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+chunk-PJEEZAML.js?v=26ffa84c:14032 The above error occurred in the <ConversationList> component:
+
+    at ConversationList (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/ConversationList.tsx:24:45)
+    at div
+    at div
+    at Sidebar (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/Sidebar.tsx:24:41)
+    at div
+    at div
+    at Layout (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/Layout.tsx:28:20)
+    at RenderedRoute (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4108:5)
+    at Routes (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4578:5)
+    at App (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/App.tsx:24:33)
+    at Router (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4521:15)
+    at BrowserRouter (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:5267:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-PJEEZAML.js?v=26ffa84c:14032
+chunk-PJEEZAML.js?v=26ffa84c:19413 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19753:22)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+    at renderRootSync (chunk-PJEEZAML.js?v=26ffa84c:19116:15)
+    at recoverFromConcurrentError (chunk-PJEEZAML.js?v=26ffa84c:18736:28)
+    at performConcurrentWorkOnRoot (chunk-PJEEZAML.js?v=26ffa84c:18684:30)
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+(anonymous) @ sw.js:43
+Promise.then
+(anonymous) @ sw.js:42
+Promise.then
+(anonymous) @ sw.js:38
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+(anonymous) @ sw.js:43
+Promise.then
+(anonymous) @ sw.js:42
+Promise.then
+(anonymous) @ sw.js:38
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+(anonymous) @ sw.js:43
+Promise.then
+(anonymous) @ sw.js:42
+Promise.then
+(anonymous) @ sw.js:38
+sw.js:43 Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+    at sw.js:43:19
+(anonymous) @ sw.js:43
+Promise.then
+(anonymous) @ sw.js:42
+Promise.then
+(anonymous) @ sw.js:38
+react-router-dom.js?v=26ffa84c:4413 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=26ffa84c:4413
+logDeprecation @ react-router-dom.js?v=26ffa84c:4416
+logV6DeprecationWarnings @ react-router-dom.js?v=26ffa84c:4419
+(anonymous) @ react-router-dom.js?v=26ffa84c:5291
+commitHookEffectListMount @ chunk-PJEEZAML.js?v=26ffa84c:16915
+commitPassiveMountOnFiber @ chunk-PJEEZAML.js?v=26ffa84c:18156
+commitPassiveMountEffects_complete @ chunk-PJEEZAML.js?v=26ffa84c:18129
+commitPassiveMountEffects_begin @ chunk-PJEEZAML.js?v=26ffa84c:18119
+commitPassiveMountEffects @ chunk-PJEEZAML.js?v=26ffa84c:18109
+flushPassiveEffectsImpl @ chunk-PJEEZAML.js?v=26ffa84c:19490
+flushPassiveEffects @ chunk-PJEEZAML.js?v=26ffa84c:19447
+(anonymous) @ chunk-PJEEZAML.js?v=26ffa84c:19328
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384
+react-router-dom.js?v=26ffa84c:4413 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=26ffa84c:4413
+logDeprecation @ react-router-dom.js?v=26ffa84c:4416
+logV6DeprecationWarnings @ react-router-dom.js?v=26ffa84c:4422
+(anonymous) @ react-router-dom.js?v=26ffa84c:5291
+commitHookEffectListMount @ chunk-PJEEZAML.js?v=26ffa84c:16915
+commitPassiveMountOnFiber @ chunk-PJEEZAML.js?v=26ffa84c:18156
+commitPassiveMountEffects_complete @ chunk-PJEEZAML.js?v=26ffa84c:18129
+commitPassiveMountEffects_begin @ chunk-PJEEZAML.js?v=26ffa84c:18119
+commitPassiveMountEffects @ chunk-PJEEZAML.js?v=26ffa84c:18109
+flushPassiveEffectsImpl @ chunk-PJEEZAML.js?v=26ffa84c:19490
+flushPassiveEffects @ chunk-PJEEZAML.js?v=26ffa84c:19447
+(anonymous) @ chunk-PJEEZAML.js?v=26ffa84c:19328
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384
+main.tsx:12 Service Worker registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/', …}active: ServiceWorker {scriptURL: 'https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/sw.js', state: 'activated', onstatechange: null, onerror: null}backgroundFetch: BackgroundFetchManager {}cookies: CookieStoreManager {}installing: nullnavigationPreload: NavigationPreloadManager {}onupdatefound: nullpaymentManager: PaymentManager {userHint: ''}periodicSync: PeriodicSyncManager {}pushManager: PushManager {}scope: "https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/"sync: SyncManager {}updateViaCache: "imports"waiting: null[[Prototype]]: ServiceWorkerRegistration
+ConversationList.tsx:54 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=26ffa84c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=26ffa84c:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=26ffa84c:3733:39)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19765:15)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+ConversationList @ ConversationList.tsx:54
+renderWithHooks @ chunk-PJEEZAML.js?v=26ffa84c:11548
+updateFunctionComponent @ chunk-PJEEZAML.js?v=26ffa84c:14582
+beginWork @ chunk-PJEEZAML.js?v=26ffa84c:15924
+callCallback2 @ chunk-PJEEZAML.js?v=26ffa84c:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=26ffa84c:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=26ffa84c:3733
+beginWork$1 @ chunk-PJEEZAML.js?v=26ffa84c:19765
+performUnitOfWork @ chunk-PJEEZAML.js?v=26ffa84c:19198
+workLoopSync @ chunk-PJEEZAML.js?v=26ffa84c:19137
+renderRootSync @ chunk-PJEEZAML.js?v=26ffa84c:19116
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18678
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384
+ConversationList.tsx:54 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-PJEEZAML.js?v=26ffa84c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-PJEEZAML.js?v=26ffa84c:3699:24)
+    at invokeGuardedCallback (chunk-PJEEZAML.js?v=26ffa84c:3733:39)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19765:15)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+ConversationList @ ConversationList.tsx:54
+renderWithHooks @ chunk-PJEEZAML.js?v=26ffa84c:11548
+updateFunctionComponent @ chunk-PJEEZAML.js?v=26ffa84c:14582
+beginWork @ chunk-PJEEZAML.js?v=26ffa84c:15924
+callCallback2 @ chunk-PJEEZAML.js?v=26ffa84c:3674
+invokeGuardedCallbackDev @ chunk-PJEEZAML.js?v=26ffa84c:3699
+invokeGuardedCallback @ chunk-PJEEZAML.js?v=26ffa84c:3733
+beginWork$1 @ chunk-PJEEZAML.js?v=26ffa84c:19765
+performUnitOfWork @ chunk-PJEEZAML.js?v=26ffa84c:19198
+workLoopSync @ chunk-PJEEZAML.js?v=26ffa84c:19137
+renderRootSync @ chunk-PJEEZAML.js?v=26ffa84c:19116
+recoverFromConcurrentError @ chunk-PJEEZAML.js?v=26ffa84c:18736
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18684
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384
+chunk-PJEEZAML.js?v=26ffa84c:14032 The above error occurred in the <ConversationList> component:
+
+    at ConversationList (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/ConversationList.tsx:24:45)
+    at div
+    at div
+    at Sidebar (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/Sidebar.tsx:24:41)
+    at div
+    at div
+    at Layout (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/components/Layout.tsx:28:20)
+    at RenderedRoute (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4108:5)
+    at Routes (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4578:5)
+    at App (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/src/App.tsx:24:33)
+    at Router (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:4521:15)
+    at BrowserRouter (https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=26ffa84c:5267:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-PJEEZAML.js?v=26ffa84c:14032
+update.callback @ chunk-PJEEZAML.js?v=26ffa84c:14052
+callCallback @ chunk-PJEEZAML.js?v=26ffa84c:11248
+commitUpdateQueue @ chunk-PJEEZAML.js?v=26ffa84c:11265
+commitLayoutEffectOnFiber @ chunk-PJEEZAML.js?v=26ffa84c:17093
+commitLayoutMountEffects_complete @ chunk-PJEEZAML.js?v=26ffa84c:17980
+commitLayoutEffects_begin @ chunk-PJEEZAML.js?v=26ffa84c:17969
+commitLayoutEffects @ chunk-PJEEZAML.js?v=26ffa84c:17920
+commitRootImpl @ chunk-PJEEZAML.js?v=26ffa84c:19353
+commitRoot @ chunk-PJEEZAML.js?v=26ffa84c:19277
+finishConcurrentRender @ chunk-PJEEZAML.js?v=26ffa84c:18760
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18718
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384
+chunk-PJEEZAML.js?v=26ffa84c:19413 Uncaught TypeError: conversations.map is not a function
+    at ConversationList (ConversationList.tsx:54:23)
+    at renderWithHooks (chunk-PJEEZAML.js?v=26ffa84c:11548:26)
+    at updateFunctionComponent (chunk-PJEEZAML.js?v=26ffa84c:14582:28)
+    at beginWork (chunk-PJEEZAML.js?v=26ffa84c:15924:22)
+    at beginWork$1 (chunk-PJEEZAML.js?v=26ffa84c:19753:22)
+    at performUnitOfWork (chunk-PJEEZAML.js?v=26ffa84c:19198:20)
+    at workLoopSync (chunk-PJEEZAML.js?v=26ffa84c:19137:13)
+    at renderRootSync (chunk-PJEEZAML.js?v=26ffa84c:19116:15)
+    at recoverFromConcurrentError (chunk-PJEEZAML.js?v=26ffa84c:18736:28)
+    at performConcurrentWorkOnRoot (chunk-PJEEZAML.js?v=26ffa84c:18684:30)
+ConversationList @ ConversationList.tsx:54
+renderWithHooks @ chunk-PJEEZAML.js?v=26ffa84c:11548
+updateFunctionComponent @ chunk-PJEEZAML.js?v=26ffa84c:14582
+beginWork @ chunk-PJEEZAML.js?v=26ffa84c:15924
+beginWork$1 @ chunk-PJEEZAML.js?v=26ffa84c:19753
+performUnitOfWork @ chunk-PJEEZAML.js?v=26ffa84c:19198
+workLoopSync @ chunk-PJEEZAML.js?v=26ffa84c:19137
+renderRootSync @ chunk-PJEEZAML.js?v=26ffa84c:19116
+recoverFromConcurrentError @ chunk-PJEEZAML.js?v=26ffa84c:18736
+performConcurrentWorkOnRoot @ chunk-PJEEZAML.js?v=26ffa84c:18684
+workLoop @ chunk-PJEEZAML.js?v=26ffa84c:197
+flushWork @ chunk-PJEEZAML.js?v=26ffa84c:176
+performWorkUntilDeadline @ chunk-PJEEZAML.js?v=26ffa84c:384
+t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev&size=32:1  GET https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev&size=32 404 (Not Found)
+faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://5b8a76f6-3647-4092-a3a…:1  GET https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://5b8a76f6-3647-4092-a3a5-8f92878e70b4-00-x2fo1fafitbn.pike.replit.dev/&size=32 404 (Not Found)
+Image
+uG @ ed1e693c96a75807.js:2
+e @ ed1e693c96a75807.js:2
+(anonymous) @ ed1e693c96a75807.js:2
+iB @ ed1e693c96a75807.js:2
+iT @ ed1e693c96a75807.js:2
+r6 @ ed1e693c96a75807.js:2
+(anonymous) @ ed1e693c96a75807.js:2

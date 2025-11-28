@@ -7,10 +7,63 @@ import { getPrismaClient } from '../utils/database.js';
 import { createLogger } from '../utils/logger.js';
 import { validateInput } from '../middleware/security.js';
 import { aiSchemas } from '../utils/validation.js';
+import { getProviderWeights } from '../services/ai/weightManager.js';
 
 const prisma = getPrismaClient();
 
 const router = Router();
+
+// 활성화된 AI 프로바이더 목록 조회
+router.get(
+  '/providers',
+  authenticateToken,
+  async (req: AuthRequest, res: Response) => {
+    const logger = createLogger({
+      screenName: 'AI',
+      callerFunction: 'getProviders',
+      screenUrl: '/api/ai/providers',
+    });
+
+    try {
+      const weights = await getProviderWeights();
+      
+      const providers = weights.map(w => ({
+        id: w.provider,
+        name: getProviderDisplayName(w.provider),
+        weight: w.weight,
+        isActive: w.isActive,
+      }));
+
+      logger.debug('Providers retrieved', {
+        userId: req.userId,
+        count: providers.length,
+        backendApiUrl: '/api/ai/providers',
+        logType: 'success',
+      });
+
+      res.json({ providers });
+    } catch (error) {
+      logger.error('Failed to get providers', {
+        userId: req.userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        backendApiUrl: '/api/ai/providers',
+        logType: 'error',
+      });
+      res.status(500).json({ error: 'Failed to get providers' });
+    }
+  }
+);
+
+function getProviderDisplayName(provider: string): string {
+  const names: Record<string, string> = {
+    openai: 'OpenAI GPT-4',
+    claude: 'Claude 3 Opus',
+    gemini: 'Google Gemini',
+    perplexity: 'Perplexity AI',
+    luxia: 'Luxia AI',
+  };
+  return names[provider] || provider;
+}
 
 /**
  * @swagger

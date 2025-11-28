@@ -34,8 +34,10 @@ export const authSchemas = {
 // AI 관련 스키마
 export const aiSchemas = {
   chat: z.object({
-    message: z.string().min(1, '메시지를 입력하세요').max(10000, '메시지는 10000자 이하여야 합니다'),
-    conversationId: z.number().int().positive().optional(),
+    message: z.string().min(1, '메시지를 입력하세요').max(50000, '메시지는 50000자 이하여야 합니다'),
+    conversationId: z.number().int().positive().optional().nullable(),
+    provider: z.enum(['openai', 'claude', 'gemini', 'perplexity', 'luxia']).optional().nullable(),
+    mixOfAgents: z.boolean().optional().default(false),
   }),
   promptSuggestions: z.object({
     words: z.array(z.string()).min(1, '단어 배열이 필요합니다'),

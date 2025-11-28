@@ -51,7 +51,7 @@ router.post(
     });
 
     try {
-      const { message, conversationId } = req.body;
+      const { message, conversationId, provider, mixOfAgents } = req.body;
 
       // 프롬프트 검증
       const validation = await validatePrompt(message);
@@ -75,6 +75,8 @@ router.post(
       logger.info('Starting AI stream', {
         userId: req.userId,
         conversationId,
+        provider: provider || 'auto',
+        mixOfAgents: mixOfAgents || false,
         logType: 'info',
       });
 
@@ -103,6 +105,10 @@ router.post(
             res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
             res.end();
           },
+        },
+        {
+          preferredProvider: provider || undefined,
+          mixOfAgents: mixOfAgents || false,
         }
       );
     } catch (error) {

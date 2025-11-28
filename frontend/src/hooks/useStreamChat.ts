@@ -16,8 +16,10 @@ export function useStreamChat() {
     async (
       message: string,
       conversationId: string | null,
-      onChunk: (chunk: string) => void,
-      onComplete: (fullResponse: string) => void,
+      provider?: string,
+      mixOfAgents?: boolean,
+      onChunk?: (chunk: string) => void,
+      onComplete?: (fullResponse: string) => void,
       onError?: (error: string) => void
     ) => {
       setIsStreaming(true);
@@ -35,6 +37,8 @@ export function useStreamChat() {
             body: JSON.stringify({
               message,
               conversationId: conversationId || null,
+              provider: provider || null,
+              mixOfAgents: mixOfAgents || false,
             }),
           }
         );
@@ -71,10 +75,10 @@ export function useStreamChat() {
 
                 if (data.type === 'chunk' && data.content) {
                   fullResponse += data.content;
-                  onChunk(data.content);
+                  onChunk?.(data.content);
                 } else if (data.type === 'complete' && data.content) {
                   fullResponse = data.content;
-                  onComplete(fullResponse);
+                  onComplete?.(fullResponse);
                 } else if (data.type === 'error') {
                   const errorMessage = data.message || 'Stream error';
                   setStreamError(errorMessage);
@@ -103,4 +107,3 @@ export function useStreamChat() {
     streamError,
   };
 }
-

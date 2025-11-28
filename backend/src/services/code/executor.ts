@@ -1,6 +1,7 @@
 import Docker from 'dockerode';
 import { createLogger } from '../../utils/logger.js';
 import { validateCode } from './validator.js';
+import { validateCodeWithAST } from './astValidator.js';
 
 const logger = createLogger({
   screenName: 'Code',
@@ -28,7 +29,7 @@ export async function executePythonCode(
   const startTime = Date.now();
 
   try {
-    // 코드 검증
+    // 코드 검증 (기본 검증)
     const validation = validateCode(code);
     if (!validation.isValid) {
       logger.warning('Code validation failed', {
@@ -39,6 +40,21 @@ export async function executePythonCode(
         success: false,
         output: '',
         error: `코드 검증 실패: ${validation.errors.join(', ')}`,
+        executionTime: Date.now() - startTime,
+      };
+    }
+
+    // AST 기반 정적 분석 검증
+    const astValidation = validateCodeWithAST(code);
+    if (!astValidation.isValid) {
+      logger.warning('AST validation failed', {
+        errors: astValidation.errors,
+        logType: 'warning',
+      });
+      return {
+        success: false,
+        output: '',
+        error: `AST 검증 실패: ${astValidation.errors.join(', ')}`,
         executionTime: Date.now() - startTime,
       };
     }
@@ -104,6 +120,18 @@ export async function executePythonCode(
 
       stream.on('end', async () => {
         clearTimeout(timeoutId);
+        
+        // 타임아웃 발생 시 즉시 반환
+        if (isTimedOut) {
+          resolve({
+            success: false,
+            output: output.trim(),
+            error: `코드 실행이 타임아웃되었습니다 (${timeout}ms 초과)`,
+            executionTime: Date.now() - startTime,
+          });
+          return;
+        }
+
         const result = buffer.toString('utf-8');
         const lines = result.split('\n');
 
@@ -118,10 +146,17 @@ export async function executePythonCode(
         }
 
         try {
-          await container.stop();
+          // 컨테이너가 이미 종료되었을 수 있음
+          const containerInfo = await container.inspect();
+          if (containerInfo.State.Running) {
+            await container.stop();
+          }
           await container.remove();
         } catch (err) {
           // 컨테이너가 이미 제거되었을 수 있음
+          logger.debug('Container already removed', {
+            logType: 'info',
+          });
         }
 
         const executionTime = Date.now() - startTime;
@@ -137,6 +172,29 @@ export async function executePythonCode(
           output: output.trim(),
           error: errorOutput.length > 0 ? errorOutput.trim() : undefined,
           executionTime,
+        });
+      });
+
+      // 스트림 에러 처리
+      stream.on('error', async (err) => {
+        clearTimeout(timeoutId);
+        logger.error('Stream error during code execution', {
+          error: err.message,
+          logType: 'error',
+        });
+        
+        try {
+          await container.stop();
+          await container.remove();
+        } catch (cleanupErr) {
+          // 무시
+        }
+
+        resolve({
+          success: false,
+          output: output.trim(),
+          error: `스트림 오류: ${err.message}`,
+          executionTime: Date.now() - startTime,
         });
       });
     });

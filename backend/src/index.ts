@@ -29,8 +29,25 @@ app.use('/api/ai/', createRateLimiter({
 }));
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+  try {
+    const { checkDatabaseConnection } = await import('./utils/database.js');
+    const dbConnected = await checkDatabaseConnection();
+    
+    res.json({
+      status: dbConnected ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      database: dbConnected ? 'connected' : 'disconnected',
+      uptime: process.uptime(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      database: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
 });
 
 // Routes

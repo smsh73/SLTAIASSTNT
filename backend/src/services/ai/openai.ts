@@ -1,9 +1,11 @@
 import OpenAI from 'openai';
-import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger.js';
 import { decrypt } from '../../utils/encryption.js';
+import { getPrismaClient } from '../../utils/database.js';
+import { getCircuitBreaker } from './circuitBreaker.js';
+import { getCircuitBreaker } from './circuitBreaker.js';
 
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 const logger = createLogger({
   screenName: 'AI',
   callerFunction: 'OpenAIClient',
@@ -49,27 +51,54 @@ export async function getOpenAIClient(): Promise<OpenAI | null> {
   }
 }
 
-export async function chatWithOpenAI(
-  messages: Array<{ role: string; content: string }>,
-  options?: { model?: string; temperature?: number }
-): Promise<string | null> {
-  try {
-    const openai = await getOpenAIClient();
-    if (!openai) return null;
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
-    const response = await openai.chat.completions.create({
-      model: options?.model || 'gpt-4-turbo-preview',
-      messages: messages as any,
-      temperature: options?.temperature || 0.7,
-    });
+export async function chatWithOpenAI(messages: ChatMessage[]): Promise<string | null> {
+  const circuitBreaker = getCircuitBreaker('openai');
+  
+  return await circuitBreaker.execute(
+    async () => {
+      try {
+        const openai = await getOpenAIClient();
+        if (!openai) {
+          throw new Error('OpenAI client not initialized');
+        }
 
-    return response.choices[0]?.message?.content || null;
-  } catch (error) {
-    logger.error('OpenAI chat error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      logType: 'error',
-    });
-    return null;
-  }
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4',
+          messages: messages.map((msg) => ({
+            role: msg.role as 'user' | 'assistant' | 'system',
+            content: msg.content,
+          })),
+          temperature: 0.7,
+          max_tokens: 2000,
+        });
+
+        const content = response.choices[0]?.message?.content || null;
+
+        logger.success('OpenAI chat completed', {
+          tokens: response.usage?.total_tokens,
+          logType: 'success',
+        });
+
+        return content;
+      } catch (error) {
+        logger.error('OpenAI chat error', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          logType: 'error',
+        });
+        throw error;
+      }
+    },
+    async () => {
+      logger.warning('OpenAI circuit breaker open, returning null', {
+        logType: 'warning',
+      });
+      return null;
+    }
+  );
 }
 

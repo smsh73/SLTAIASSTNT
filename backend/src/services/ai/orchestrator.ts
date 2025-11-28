@@ -1,5 +1,7 @@
 import { routeAndChat, ChatMessage, RoutingResult } from './router.js';
 import { createLogger } from '../../utils/logger.js';
+import { getCircuitBreaker } from './circuitBreaker.js';
+import { getCache, setCache, CACHE_PREFIXES } from '../../utils/cache.js';
 
 const logger = createLogger({
   screenName: 'AI',
@@ -17,6 +19,22 @@ export async function orchestrateAI(
   options?: OrchestrationOptions
 ): Promise<string | null> {
   try {
+    // 캐시 키 생성 (프롬프트 기반)
+    const cacheKey = `orchestrate:${Buffer.from(userPrompt).toString('base64').substring(0, 50)}`;
+    
+    // 캐시 확인
+    const cached = await getCache<string>(cacheKey, {
+      prefix: CACHE_PREFIXES.API_RESPONSE,
+      ttl: 3600, // 1시간
+    });
+    
+    if (cached) {
+      logger.info('AI response retrieved from cache', {
+        logType: 'success',
+      });
+      return cached;
+    }
+
     // 기본 라우팅 및 채팅
     const result = await routeAndChat(messages, userPrompt);
 
@@ -80,6 +98,14 @@ export async function orchestrateAI(
     if (options?.useMultipleProviders) {
       // 여러 프로바이더의 응답을 결합하는 로직
       // 현재는 단일 응답 반환
+    }
+
+    // 응답 캐싱
+    if (result.response) {
+      await setCache(cacheKey, result.response, {
+        prefix: CACHE_PREFIXES.API_RESPONSE,
+        ttl: 3600, // 1시간
+      });
     }
 
     return result.response;

@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { createLogger } from '../utils/logger.js';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import { validateInput } from '../middleware/security.js';
 import { authSchemas } from '../utils/validation.js';
+import { getPrismaClient } from '../utils/database.js';
 
 const router = Router();
-const prisma = new PrismaClient();
+const prisma = getPrismaClient();
 
 // Register
 router.post('/register', validateInput(authSchemas.register), async (req: Request, res: Response) => {

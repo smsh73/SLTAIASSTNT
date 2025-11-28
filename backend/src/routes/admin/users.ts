@@ -216,5 +216,104 @@ router.delete(
   }
 );
 
+// CSV 대량 업로드
+router.post(
+  '/bulk',
+  authenticateToken,
+  requireAdmin,
+  async (req: AuthRequest, res: Response) => {
+    const logger = createLogger({
+      screenName: 'Admin',
+      callerFunction: 'bulkCreateUsers',
+      screenUrl: '/api/admin/users/bulk',
+    });
+
+    try {
+      const { users: usersData } = req.body;
+
+      if (!Array.isArray(usersData) || usersData.length === 0) {
+        res.status(400).json({ error: 'Users array is required' });
+        return;
+      }
+
+      const results = {
+        success: [] as any[],
+        failed: [] as any[],
+      };
+
+      for (const userData of usersData) {
+        try {
+          const { email, password, name, role } = userData;
+
+          if (!email || !password || !name) {
+            results.failed.push({
+              email: email || 'unknown',
+              error: 'Email, password, and name are required',
+            });
+            continue;
+          }
+
+          const existingUser = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (existingUser) {
+            results.failed.push({
+              email,
+              error: 'User with this email already exists',
+            });
+            continue;
+          }
+
+          const passwordHash = await hashPassword(password);
+
+          const user = await prisma.user.create({
+            data: {
+              email,
+              passwordHash,
+              name,
+              role: role || 'user',
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+            },
+          });
+
+          results.success.push(user);
+        } catch (error) {
+          results.failed.push({
+            email: userData.email || 'unknown',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }
+
+      logger.success('Bulk user creation completed', {
+        userId: req.userId,
+        successCount: results.success.length,
+        failedCount: results.failed.length,
+        backendApiUrl: '/api/admin/users/bulk',
+        logType: 'success',
+      });
+
+      res.json({
+        message: `${results.success.length} users created, ${results.failed.length} failed`,
+        results,
+      });
+    } catch (error) {
+      logger.error('Bulk user creation error', {
+        userId: req.userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        backendApiUrl: '/api/admin/users/bulk',
+        logType: 'error',
+      });
+      res.status(500).json({ error: 'Failed to bulk create users' });
+    }
+  }
+);
+
 export default router;
 

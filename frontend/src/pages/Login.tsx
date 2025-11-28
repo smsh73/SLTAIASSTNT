@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
@@ -10,7 +9,6 @@ export default function Login() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { setAuth } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +23,7 @@ export default function Login() {
       const response = await axios.post(endpoint, data);
 
       setAuth(response.data.user, response.data.token);
-      navigate('/');
+      window.location.href = '/';
     } catch (err: any) {
       setError(err.response?.data?.error || 'An error occurred');
     } finally {

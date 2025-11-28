@@ -54,11 +54,16 @@ export default function ChatInput({
           placeholder="메시지를 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)"
           className="flex-1 px-4 py-3 resize-none border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400"
           rows={1}
+          aria-label="메시지 입력"
+          aria-describedby="input-help"
           style={{
             minHeight: '52px',
             maxHeight: '200px',
           }}
         />
+        <span id="input-help" className="sr-only">
+          Enter 키로 전송, Shift+Enter로 줄바꿈
+        </span>
         <button
           onClick={() => {
             if (value.trim() && !loading) {
@@ -67,6 +72,8 @@ export default function ChatInput({
           }}
           disabled={!value.trim() || loading}
           className="m-2 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          aria-label="메시지 전송"
+          aria-disabled={!value.trim() || loading}
         >
           {loading ? '전송 중...' : '전송'}
         </button>

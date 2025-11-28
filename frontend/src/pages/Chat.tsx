@@ -8,6 +8,7 @@ import ConversationHistory from '../components/ConversationHistory';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { Message } from '../types/message';
+import { useStreamChat } from '../hooks/useStreamChat';
 
 export default function Chat() {
   const { conversationId } = useParams();
@@ -16,8 +17,10 @@ export default function Chat() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { token } = useAuthStore();
+  const { streamChat, isStreaming } = useStreamChat();
 
   useEffect(() => {
     if (conversationId) {
@@ -56,40 +59,52 @@ export default function Chat() {
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
     setCurrentInput('');
+    setStreamingMessage('');
 
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/ai/chat`,
-        {
-          message,
-          conversationId: conversationId || null,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    // 스트리밍 모드로 전송
+    const assistantMessageId = Date.now() + 1;
+    const assistantMessage: Message = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      createdAt: new Date().toISOString(),
+    };
 
-      const assistantMessage: Message = {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: response.data.content,
-        createdAt: new Date().toISOString(),
-      };
+    setMessages((prev) => [...prev, assistantMessage]);
 
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (!conversationId && response.data.conversationId) {
-        window.history.pushState(
-          {},
-          '',
-          `/chat/${response.data.conversationId}`
+    await streamChat(
+      message,
+      conversationId || null,
+      (chunk: string) => {
+        setStreamingMessage((prev) => {
+          const newContent = prev + chunk;
+          setMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: newContent }
+                : msg
+            )
+          );
+          return newContent;
+        });
+      },
+      (fullResponse: string) => {
+        setStreamingMessage('');
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: fullResponse }
+              : msg
+          )
         );
+        setLoading(false);
+      },
+      (error: string) => {
+        console.error('Stream error:', error);
+        setStreamingMessage('');
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to send message', error);
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
   return (

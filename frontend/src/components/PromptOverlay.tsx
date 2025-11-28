@@ -36,10 +36,17 @@ export default function PromptOverlay({
           <button
             key={index}
             onClick={() => onSelect(suggestion)}
-            className="w-full text-left px-3 py-2 rounded hover:bg-primary-50 text-sm text-gray-700 transition-colors"
+            className="w-full text-left px-3 py-2 rounded hover:bg-primary-50 text-sm text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            aria-label={`프롬프트 제안: ${suggestion}`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect(suggestion);
+              }
+            }}
           >
             <div className="flex items-start space-x-2">
-              <span className="text-primary-500 mt-1">💡</span>
+              <span className="text-primary-500 mt-1" aria-hidden="true">💡</span>
               <span className="flex-1">{suggestion}</span>
             </div>
           </button>

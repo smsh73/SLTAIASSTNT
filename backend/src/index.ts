@@ -57,6 +57,7 @@ app.get('/health', async (req, res) => {
 // Routes
 import authRoutes from './routes/auth.js';
 import aiRoutes from './routes/ai.js';
+import aiStreamRoutes from './routes/ai-stream.js';
 import documentRoutes from './routes/documents.js';
 import codeRoutes from './routes/code.js';
 import workflowRoutes from './routes/workflows.js';
@@ -70,6 +71,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/ai', aiStreamRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/code', codeRoutes);
 app.use('/api/workflows', workflowRoutes);

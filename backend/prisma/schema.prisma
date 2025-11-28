@@ -1,7 +1,5 @@
-// Prisma 스키마 - 200% 완성도 버전
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -9,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 사용자 테이블
 model User {
   id           Int       @id @default(autoincrement())
   email        String    @unique @db.VarChar(255)
@@ -37,7 +34,6 @@ model User {
   @@map("users")
 }
 
-// 대화 세션 테이블
 model Conversation {
   id          Int       @id @default(autoincrement())
   userId      Int      @map("user_id")
@@ -57,11 +53,9 @@ model Conversation {
   @@index([status])
   @@index([createdAt])
   @@index([topic])
-  @@fulltext([title, topic])
   @@map("conversations")
 }
 
-// 메시지 테이블
 model Message {
   id             Int       @id @default(autoincrement())
   conversationId Int       @map("conversation_id")
@@ -82,11 +76,9 @@ model Message {
   @@index([role])
   @@index([createdAt])
   @@index([provider])
-  @@fulltext([content])
   @@map("messages")
 }
 
-// 문서 테이블
 model Document {
   id             Int       @id @default(autoincrement())
   userId         Int       @map("user_id")
@@ -109,11 +101,9 @@ model Document {
   @@index([type])
   @@index([status])
   @@index([createdAt])
-  @@fulltext([name])
   @@map("documents")
 }
 
-// API 키 테이블
 model ApiKey {
   id        Int       @id @default(autoincrement())
   provider  String    @db.VarChar(50)
@@ -135,7 +125,6 @@ model ApiKey {
   @@map("api_keys")
 }
 
-// 워크플로우 테이블
 model Workflow {
   id             Int       @id @default(autoincrement())
   userId         Int       @map("user_id")
@@ -159,11 +148,9 @@ model Workflow {
   @@index([status])
   @@index([createdAt])
   @@index([startedAt])
-  @@fulltext([name])
   @@map("workflows")
 }
 
-// 로그 테이블
 model Log {
   id            Int       @id @default(autoincrement())
   userId        Int?      @map("user_id")
@@ -187,11 +174,9 @@ model Log {
   @@index([screenName])
   @@index([backendApiUrl])
   @@index([callerFunction])
-  @@fulltext([message])
   @@map("logs")
 }
 
-// 가드레일 테이블
 model Guardrail {
   id          Int       @id @default(autoincrement())
   name        String    @db.VarChar(255)
@@ -210,11 +195,9 @@ model Guardrail {
   @@index([priority])
   @@index([action])
   @@index([createdBy])
-  @@fulltext([name, description])
   @@map("guardrails")
 }
 
-// 세션 테이블 (추가)
 model Session {
   id           Int       @id @default(autoincrement())
   userId       Int       @map("user_id")
@@ -235,7 +218,6 @@ model Session {
   @@map("sessions")
 }
 
-// MCP 연결 테이블 (추가)
 model MCPConnection {
   id          Int       @id @default(autoincrement())
   name        String    @unique @db.VarChar(255)
@@ -250,11 +232,9 @@ model MCPConnection {
   @@index([isActive])
   @@index([serverType])
   @@index([lastUsedAt])
-  @@fulltext([name])
   @@map("mcp_connections")
 }
 
-// 워크플로우 실행 이력 테이블 (추가)
 model WorkflowExecution {
   id          Int       @id @default(autoincrement())
   workflowId  Int       @map("workflow_id")
@@ -274,7 +254,6 @@ model WorkflowExecution {
   @@map("workflow_executions")
 }
 
-// 캐시 메타데이터 테이블 (추가)
 model CacheMetadata {
   id         Int       @id @default(autoincrement())
   key        String    @unique @db.VarChar(500)
@@ -293,7 +272,6 @@ model CacheMetadata {
   @@map("cache_metadata")
 }
 
-// AI 요청 통계 테이블 (추가)
 model AIRequestStats {
   id          Int       @id @default(autoincrement())
   provider    String    @db.VarChar(50)

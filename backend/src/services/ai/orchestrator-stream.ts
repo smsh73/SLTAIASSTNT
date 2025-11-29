@@ -20,9 +20,11 @@ export interface StreamCallbacks {
   onError: (error: Error) => void;
 }
 
+export type ChatMode = 'normal' | 'mix' | 'a2a';
+
 export interface StreamOptions {
   preferredProvider?: string;
-  mixOfAgents?: boolean;
+  chatMode?: ChatMode;
 }
 
 export async function orchestrateAIStream(
@@ -33,6 +35,7 @@ export async function orchestrateAIStream(
 ): Promise<void> {
   try {
     let provider = options?.preferredProvider;
+    const chatMode = options?.chatMode || 'normal';
     
     if (!provider) {
       const intent = analyzeIntent(userPrompt);
@@ -41,14 +44,19 @@ export async function orchestrateAIStream(
     
     logger.info('Stream orchestration starting', {
       provider,
-      mixOfAgents: options?.mixOfAgents || false,
+      chatMode,
       logType: 'info',
     });
 
-    if (options?.mixOfAgents) {
-      await handleMixOfAgents(messages, callbacks);
-    } else {
-      await handleSingleProvider(messages, provider, callbacks);
+    switch (chatMode) {
+      case 'mix':
+        await handleMixOfAgents(messages, callbacks);
+        break;
+      case 'a2a':
+        await handleA2AMode(messages, userPrompt, callbacks);
+        break;
+      default:
+        await handleSingleProvider(messages, provider, callbacks);
     }
   } catch (error) {
     logger.error('Stream orchestration error', {
@@ -327,4 +335,312 @@ function formatMixedResponses(responses: { provider: string; response: string }[
   }
   
   return result;
+}
+
+async function handleA2AMode(
+  messages: ChatMessage[],
+  userPrompt: string,
+  callbacks: StreamCallbacks
+): Promise<void> {
+  const providers = ['openai', 'claude', 'gemini', 'perplexity'];
+  const conversationHistory: { provider: string; content: string; phase: string; round: number }[] = [];
+  let fullResponse = '';
+
+  const header = `## A2A 협력 토론 모드\n\n여러 AI 에이전트가 협력하여 최적의 답변을 도출합니다.\n\n**주제**: ${userPrompt}\n\n---\n\n`;
+  fullResponse += header;
+  callbacks.onChunk(header);
+
+  const phase1Header = `### 1단계: 협력적 인사이트 공유 (2라운드)\n\n`;
+  fullResponse += phase1Header;
+  callbacks.onChunk(phase1Header);
+
+  for (let round = 1; round <= 2; round++) {
+    const roundHeader = `#### 라운드 ${round}\n\n`;
+    fullResponse += roundHeader;
+    callbacks.onChunk(roundHeader);
+
+    for (const provider of providers) {
+      try {
+        const providerHeader = `**${getProviderName(provider)}**:\n`;
+        fullResponse += providerHeader;
+        callbacks.onChunk(providerHeader);
+
+        const contextMessages = buildA2AContextMessages(
+          userPrompt,
+          conversationHistory,
+          provider,
+          'collaboration',
+          round
+        );
+
+        const response = await getProviderResponse(provider, contextMessages);
+        
+        if (response) {
+          const words = response.split(' ');
+          let providerResponse = '';
+          
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i] + (i < words.length - 1 ? ' ' : '');
+            providerResponse += word;
+            fullResponse += word;
+            callbacks.onChunk(word);
+            
+            if (i % 8 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 10));
+            }
+          }
+
+          conversationHistory.push({
+            provider,
+            content: providerResponse,
+            phase: 'collaboration',
+            round,
+          });
+
+          const footer = '\n\n';
+          fullResponse += footer;
+          callbacks.onChunk(footer);
+        } else {
+          const noResponse = '*응답을 받지 못했습니다.*\n\n';
+          fullResponse += noResponse;
+          callbacks.onChunk(noResponse);
+        }
+      } catch (error) {
+        logger.warning(`A2A: ${provider} failed in collaboration round ${round}`, {
+          error: error instanceof Error ? error.message : 'Unknown',
+          logType: 'warning',
+        });
+        const errorText = `*오류 발생*\n\n`;
+        fullResponse += errorText;
+        callbacks.onChunk(errorText);
+      }
+    }
+  }
+
+  const phase2Header = `---\n\n### 2단계: 토론 및 보완 (2라운드)\n\n`;
+  fullResponse += phase2Header;
+  callbacks.onChunk(phase2Header);
+
+  for (let round = 1; round <= 2; round++) {
+    const roundHeader = `#### 토론 라운드 ${round}\n\n`;
+    fullResponse += roundHeader;
+    callbacks.onChunk(roundHeader);
+
+    for (const provider of providers) {
+      try {
+        const providerHeader = `**${getProviderName(provider)}**:\n`;
+        fullResponse += providerHeader;
+        callbacks.onChunk(providerHeader);
+
+        const contextMessages = buildA2AContextMessages(
+          userPrompt,
+          conversationHistory,
+          provider,
+          'debate',
+          round
+        );
+
+        const response = await getProviderResponse(provider, contextMessages);
+        
+        if (response) {
+          const words = response.split(' ');
+          let providerResponse = '';
+          
+          for (let i = 0; i < words.length; i++) {
+            const word = words[i] + (i < words.length - 1 ? ' ' : '');
+            providerResponse += word;
+            fullResponse += word;
+            callbacks.onChunk(word);
+            
+            if (i % 8 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 10));
+            }
+          }
+
+          conversationHistory.push({
+            provider,
+            content: providerResponse,
+            phase: 'debate',
+            round,
+          });
+
+          const footer = '\n\n';
+          fullResponse += footer;
+          callbacks.onChunk(footer);
+        } else {
+          const noResponse = '*응답을 받지 못했습니다.*\n\n';
+          fullResponse += noResponse;
+          callbacks.onChunk(noResponse);
+        }
+      } catch (error) {
+        logger.warning(`A2A: ${provider} failed in debate round ${round}`, {
+          error: error instanceof Error ? error.message : 'Unknown',
+          logType: 'warning',
+        });
+        const errorText = `*오류 발생*\n\n`;
+        fullResponse += errorText;
+        callbacks.onChunk(errorText);
+      }
+    }
+  }
+
+  const synthesisHeader = `---\n\n### 3단계: Luxia AI 최종 종합\n\n`;
+  fullResponse += synthesisHeader;
+  callbacks.onChunk(synthesisHeader);
+
+  try {
+    const synthesisMessages = buildSynthesisMessages(userPrompt, conversationHistory);
+    const synthesisResponse = await chatWithLuxia(synthesisMessages);
+    
+    if (synthesisResponse) {
+      const words = synthesisResponse.split(' ');
+      
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i] + (i < words.length - 1 ? ' ' : '');
+        fullResponse += word;
+        callbacks.onChunk(word);
+        
+        if (i % 8 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      }
+    } else {
+      const fallbackHeader = '*Luxia 응답 실패, Claude로 대체 종합 중...*\n\n';
+      fullResponse += fallbackHeader;
+      callbacks.onChunk(fallbackHeader);
+      
+      const fallbackResponse = await chatWithClaude(synthesisMessages);
+      if (fallbackResponse) {
+        const words = fallbackResponse.split(' ');
+        for (let i = 0; i < words.length; i++) {
+          const word = words[i] + (i < words.length - 1 ? ' ' : '');
+          fullResponse += word;
+          callbacks.onChunk(word);
+          if (i % 8 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+        }
+      }
+    }
+  } catch (error) {
+    logger.error('A2A synthesis failed', {
+      error: error instanceof Error ? error.message : 'Unknown',
+      logType: 'error',
+    });
+    const errorText = '\n\n*최종 종합 중 오류가 발생했습니다.*';
+    fullResponse += errorText;
+    callbacks.onChunk(errorText);
+  }
+
+  const endFooter = '\n\n---\n\n*A2A 협력 토론이 완료되었습니다.*';
+  fullResponse += endFooter;
+  callbacks.onChunk(endFooter);
+
+  callbacks.onComplete(fullResponse);
+}
+
+function buildA2AContextMessages(
+  userPrompt: string,
+  history: { provider: string; content: string; phase: string; round: number }[],
+  currentProvider: string,
+  phase: 'collaboration' | 'debate',
+  round: number
+): ChatMessage[] {
+  const messages: ChatMessage[] = [];
+  
+  let systemPrompt = '';
+  
+  if (phase === 'collaboration') {
+    systemPrompt = `당신은 ${getProviderName(currentProvider)}입니다. 다른 AI 에이전트들과 함께 협력하여 사용자의 질문에 대한 최적의 답변을 도출하는 토론에 참여하고 있습니다.
+
+지금은 협력적 인사이트 공유 단계 ${round}라운드입니다.
+- 이전 발언자들의 의견을 참고하여 새로운 관점이나 보완적인 인사이트를 제시하세요.
+- 다른 에이전트의 좋은 아이디어는 인정하고 발전시키세요.
+- 간결하면서도 핵심적인 내용을 담아 2-3문단 이내로 답변하세요.
+- 한국어로 답변하세요.`;
+  } else {
+    systemPrompt = `당신은 ${getProviderName(currentProvider)}입니다. 다른 AI 에이전트들과 함께 토론하며 답변을 개선하고 있습니다.
+
+지금은 토론 및 보완 단계 ${round}라운드입니다.
+- 지금까지의 논의에서 부족한 점이나 보완이 필요한 부분을 지적하세요.
+- 건설적인 비평과 함께 개선된 인사이트를 제안하세요.
+- 다른 에이전트들의 의견 중 동의하지 않는 부분이 있다면 논리적으로 반박하세요.
+- 간결하면서도 핵심적인 내용을 담아 2-3문단 이내로 답변하세요.
+- 한국어로 답변하세요.`;
+  }
+
+  messages.push({ role: 'system', content: systemPrompt });
+
+  let conversationContext = `사용자 질문: ${userPrompt}\n\n`;
+  
+  if (history.length > 0) {
+    conversationContext += '지금까지의 토론 내용:\n\n';
+    for (const entry of history) {
+      conversationContext += `[${getProviderName(entry.provider)} - ${entry.phase === 'collaboration' ? '협력' : '토론'} ${entry.round}라운드]\n${entry.content}\n\n`;
+    }
+  }
+
+  messages.push({ role: 'user', content: conversationContext });
+
+  return messages;
+}
+
+function buildSynthesisMessages(
+  userPrompt: string,
+  history: { provider: string; content: string; phase: string; round: number }[]
+): ChatMessage[] {
+  const systemPrompt = `당신은 Luxia AI입니다. 여러 AI 에이전트들의 협력적 토론 결과를 종합하여 최종 답변을 제시하는 역할을 맡고 있습니다.
+
+다음 사항을 고려하여 최종 종합 답변을 작성하세요:
+1. 모든 에이전트들의 핵심 인사이트를 통합하세요.
+2. 토론 과정에서 합의된 내용과 개선된 점을 반영하세요.
+3. 상충되는 의견이 있었다면 가장 논리적이고 타당한 결론을 도출하세요.
+4. 실용적이고 실행 가능한 최종 답변을 구성하세요.
+5. 한국어로 답변하세요.`;
+
+  let conversationSummary = `원래 질문: ${userPrompt}\n\n=== 토론 전체 내용 ===\n\n`;
+
+  const collaborationEntries = history.filter(h => h.phase === 'collaboration');
+  const debateEntries = history.filter(h => h.phase === 'debate');
+
+  if (collaborationEntries.length > 0) {
+    conversationSummary += '## 협력적 인사이트 공유 단계\n\n';
+    for (const entry of collaborationEntries) {
+      conversationSummary += `**${getProviderName(entry.provider)}** (라운드 ${entry.round}):\n${entry.content}\n\n`;
+    }
+  }
+
+  if (debateEntries.length > 0) {
+    conversationSummary += '## 토론 및 보완 단계\n\n';
+    for (const entry of debateEntries) {
+      conversationSummary += `**${getProviderName(entry.provider)}** (라운드 ${entry.round}):\n${entry.content}\n\n`;
+    }
+  }
+
+  conversationSummary += '\n위의 토론 내용을 바탕으로 최종 종합 답변을 작성해주세요.';
+
+  return [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: conversationSummary },
+  ];
+}
+
+async function getProviderResponse(
+  provider: string,
+  messages: ChatMessage[]
+): Promise<string | null> {
+  switch (provider) {
+    case 'openai':
+      return getOpenAINonStream(messages);
+    case 'claude':
+      return chatWithClaude(messages);
+    case 'gemini':
+      return chatWithGemini(messages);
+    case 'perplexity':
+      return chatWithPerplexity(messages);
+    case 'luxia':
+      return chatWithLuxia(messages);
+    default:
+      return null;
+  }
 }

@@ -51,7 +51,7 @@ router.post(
     });
 
     try {
-      const { message, conversationId, provider, mixOfAgents } = req.body;
+      const { message, conversationId, provider, chatMode } = req.body;
 
       // 프롬프트 검증
       const validation = await validatePrompt(message);
@@ -76,7 +76,7 @@ router.post(
         userId: req.userId,
         conversationId,
         provider: provider || 'auto',
-        mixOfAgents: mixOfAgents || false,
+        chatMode: chatMode || 'normal',
         logType: 'info',
       });
 
@@ -108,7 +108,7 @@ router.post(
         },
         {
           preferredProvider: provider || undefined,
-          mixOfAgents: mixOfAgents || false,
+          chatMode: chatMode || 'normal',
         }
       );
     } catch (error) {

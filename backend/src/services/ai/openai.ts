@@ -72,13 +72,13 @@ export async function chatWithOpenAI(messages: ChatMessage[]): Promise<string | 
         }
 
         const response = await openai.chat.completions.create({
-          model: 'gpt-4',
+          model: 'gpt-4o',
           messages: messages.map((msg) => ({
             role: msg.role as 'user' | 'assistant' | 'system',
             content: msg.content,
           })),
           temperature: 0.7,
-          max_tokens: 2000,
+          max_tokens: 4096,
         });
 
         const content = response.choices[0]?.message?.content || null;

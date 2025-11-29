@@ -82,6 +82,8 @@ async function handleSingleProvider(
             callbacks.onError(error);
           },
         });
+      } else if (provider === 'luxia') {
+        await handleLuxiaStream(messages, callbacks);
       } else {
         let response: string | null = null;
         
@@ -94,9 +96,6 @@ async function handleSingleProvider(
             break;
           case 'perplexity':
             response = await chatWithPerplexity(messages);
-            break;
-          case 'luxia':
-            response = await chatWithLuxia(messages);
             break;
           default:
             response = await chatWithClaude(messages);
@@ -216,6 +215,92 @@ async function handleMixOfAgents(
   }
   
   callbacks.onComplete(fullResponse);
+}
+
+async function handleLuxiaStream(
+  messages: ChatMessage[],
+  callbacks: StreamCallbacks
+): Promise<void> {
+  try {
+    const stream = await streamLuxia(messages);
+    
+    if (!stream) {
+      logger.warning('Luxia stream not available, falling back to non-stream', {
+        logType: 'warning',
+      });
+      await handleLuxiaFallback(messages, callbacks);
+      return;
+    }
+    
+    let fullResponse = '';
+    let buffer = '';
+    let hasError = false;
+    
+    stream.on('data', (chunk: Buffer) => {
+      buffer += chunk.toString();
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') {
+            continue;
+          }
+          try {
+            const parsed = JSON.parse(data);
+            const content = parsed.choices?.[0]?.delta?.content || '';
+            if (content) {
+              fullResponse += content;
+              callbacks.onChunk(content);
+            }
+          } catch {
+            // Skip unparseable lines
+          }
+        }
+      }
+    });
+    
+    await new Promise<void>((resolve, reject) => {
+      stream.on('end', () => {
+        if (fullResponse) {
+          callbacks.onComplete(fullResponse);
+        }
+        resolve();
+      });
+      stream.on('error', (error: Error) => {
+        hasError = true;
+        logger.warning('Luxia stream error, will fallback', {
+          error: error.message,
+          logType: 'warning',
+        });
+        reject(error);
+      });
+    });
+  } catch (error) {
+    logger.warning('Luxia stream failed, falling back to non-stream', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      logType: 'warning',
+    });
+    await handleLuxiaFallback(messages, callbacks);
+  }
+}
+
+async function handleLuxiaFallback(
+  messages: ChatMessage[],
+  callbacks: StreamCallbacks
+): Promise<void> {
+  try {
+    const response = await chatWithLuxia(messages);
+    if (response) {
+      callbacks.onChunk(response);
+      callbacks.onComplete(response);
+    } else {
+      callbacks.onError(new Error('Luxia API returned no response'));
+    }
+  } catch (error) {
+    callbacks.onError(error instanceof Error ? error : new Error('Luxia fallback failed'));
+  }
 }
 
 async function getOpenAINonStream(messages: ChatMessage[]): Promise<string | null> {

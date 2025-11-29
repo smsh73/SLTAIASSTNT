@@ -70,7 +70,7 @@ export async function chatWithLuxia(
         temperature: options?.temperature ?? 0,
         max_completion_tokens: options?.maxTokens || 2048,
         top_p: options?.topP ?? 1,
-        frequency_penalty: options?.frequencyPenalty ?? 0.1,
+        frequency_penalty: options?.frequencyPenalty ?? 0,
       },
       {
         headers: {
@@ -110,7 +110,7 @@ export async function streamLuxia(
         temperature: options?.temperature ?? 0,
         max_completion_tokens: options?.maxTokens || 2048,
         top_p: options?.topP ?? 1,
-        frequency_penalty: options?.frequencyPenalty ?? 0.1,
+        frequency_penalty: options?.frequencyPenalty ?? 0,
       },
       {
         headers: {

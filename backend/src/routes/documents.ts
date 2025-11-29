@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
-import { uploadToS3 } from '../services/storage/s3.js';
+import { uploadToLocalStorage } from '../services/storage/localStorage.js';
 import { parseDocument } from '../services/documents/parser.js';
 import {
   summarizeDocument,
@@ -16,7 +16,6 @@ const router = Router();
 const prisma = getPrismaClient();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// 문서 업로드
 router.post(
   '/upload',
   authenticateToken,
@@ -43,24 +42,20 @@ router.post(
       const file = req.file;
       const fileKey = `documents/${req.userId}/${uuidv4()}-${file.originalname}`;
 
-      // S3 업로드
-      const s3Url = await uploadToS3(file.buffer, fileKey, file.mimetype);
+      const fileUrl = await uploadToLocalStorage(file.buffer, fileKey, file.mimetype);
 
-      // 문서 파싱
       const parsed = await parseDocument(file.buffer, file.originalname);
 
-      // 데이터베이스에 저장
       const document = await prisma.document.create({
         data: {
           userId: req.userId!,
           conversationId: conversationId ? parseInt(conversationId) : null,
-          filename: fileKey,
-          originalFilename: file.originalname,
-          fileType: file.mimetype,
-          fileSize: BigInt(file.size),
+          name: file.originalname,
+          type: file.mimetype,
+          size: BigInt(file.size),
           s3Key: fileKey,
-          s3Url,
-          metadata: parsed.metadata,
+          s3Url: fileUrl,
+          metadata: { ...parsed.metadata, text: parsed.text },
         },
       });
 
@@ -75,9 +70,9 @@ router.post(
       res.json({
         document: {
           id: document.id,
-          filename: document.originalFilename,
-          fileType: document.fileType,
-          s3Url,
+          filename: document.name,
+          fileType: document.type,
+          url: fileUrl,
           parsedText: parsed.text,
         },
       });

@@ -100,8 +100,10 @@ export async function executePythonCode(
 
     let output = '';
     let errorOutput = '';
+    let isTimedOut = false;
 
     const timeoutId = setTimeout(async () => {
+      isTimedOut = true;
       try {
         await container.stop();
         logger.warning('Code execution timeout', {

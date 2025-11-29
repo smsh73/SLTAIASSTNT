@@ -138,8 +138,8 @@ export function recordAIRequest(
 }
 
 export function recordCodeExecution(
-  type: 'python' | 'notebook',
-  status: 'success' | 'error',
+  type: 'python' | 'notebook' | 'javascript' | 'bash',
+  status: 'success' | 'error' | 'timeout',
   duration: number
 ): void {
   codeExecutionCounter.inc({ type, status });

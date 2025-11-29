@@ -8,7 +8,9 @@ import {
 import {
   executePythonCode,
   executeNotebook,
-} from '../services/code/executor.js';
+  executeCode,
+  getExecutionMode,
+} from '../services/code/index.js';
 import { createLogger } from '../utils/logger.js';
 import { codeSchemas } from '../utils/validation.js';
 

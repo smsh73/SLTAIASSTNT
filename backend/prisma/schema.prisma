@@ -289,3 +289,17 @@ model AIRequestStats {
   @@index([date])
   @@map("ai_request_stats")
 }
+
+model SystemSettings {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(255)
+  value     String   @db.Text
+  category  String   @default("general") @db.VarChar(100)
+  description String? @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([key])
+  @@map("system_settings")
+}

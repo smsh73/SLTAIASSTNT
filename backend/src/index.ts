@@ -44,6 +44,10 @@ app.use('/api/ai/', createRateLimiter({
   maxRequests: 20,
 }));
 
+// Serve uploaded files
+const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
+app.use('/uploads', express.static(path.resolve(UPLOAD_DIR)));
+
 // Health check
 app.get('/health', async (req, res) => {
   try {

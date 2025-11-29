@@ -63,6 +63,15 @@ Access Swagger API docs at `/api-docs` when the backend is running.
 
 ## Recent Changes
 
+- **2025-11-29**: System Configuration & Security Improvements
+  - Added admin settings API (`/api/admin/settings`) for managing system configuration
+  - Implemented local code execution mode with security validation patterns
+  - Added CODE_EXECUTION_MODE toggle (local/docker) - admin controlled
+  - Added CODE_EXECUTION_ENABLED toggle to enable/disable code execution
+  - Implemented local file storage (`/uploads`) replacing S3 dependency
+  - Added security patterns to block dangerous code (subprocess, os.system, etc.)
+  - Created SystemSettings model in database for persistent configuration
+
 - **2025-11-28**: Enhanced Chat Features
   - Added AI provider selection dropdown (OpenAI, Claude, Gemini, Perplexity, Luxia)
   - Implemented file upload UI with document context support
@@ -77,3 +86,17 @@ Access Swagger API docs at `/api-docs` when the backend is running.
   - Fixed circular dependency in logger/database modules
   - Added missing imports in route files
   - Set up deployment configuration
+
+## Admin Settings
+
+The following system settings can be configured via `/api/admin/settings`:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| CODE_EXECUTION_MODE | local | Code execution mode (local/docker) |
+| CODE_EXECUTION_ENABLED | false | Enable/disable code execution (disabled by default for security) |
+| CODE_EXECUTION_TIMEOUT | 30000 | Execution timeout in milliseconds |
+| STORAGE_MODE | local | File storage mode (local/s3) |
+| MAX_FILE_SIZE | 52428800 | Max upload file size (50MB) |
+| AI_DEFAULT_PROVIDER | auto | Default AI provider |
+| AI_MIX_OF_AGENTS_ENABLED | true | Enable Mix of Agents mode |

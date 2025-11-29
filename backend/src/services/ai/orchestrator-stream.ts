@@ -145,26 +145,43 @@ async function handleSingleProvider(
       } else if (provider === 'luxia') {
         await handleLuxiaStream(messagesWithSystem, callbacks);
       } else {
+        logger.info(`Starting non-streaming provider: ${provider}`, { 
+          provider,
+          logType: 'info' 
+        });
+        
         let response: string | null = null;
         
         switch (provider) {
           case 'claude':
+            logger.info('Calling Claude API...', { logType: 'info' });
             response = await chatWithClaude(messagesWithSystem);
             break;
           case 'gemini':
+            logger.info('Calling Gemini API...', { logType: 'info' });
             response = await chatWithGemini(messagesWithSystem);
             break;
           case 'perplexity':
+            logger.info('Calling Perplexity API...', { logType: 'info' });
             response = await chatWithPerplexity(messagesWithSystem);
             break;
           default:
+            logger.info(`Unknown provider ${provider}, falling back to Claude`, { logType: 'warning' });
             response = await chatWithClaude(messagesWithSystem);
         }
+        
+        logger.info(`Provider ${provider} response received`, { 
+          provider,
+          hasResponse: !!response,
+          responseLength: response?.length || 0,
+          logType: response ? 'success' : 'warning' 
+        });
         
         if (response) {
           callbacks.onChunk(response);
           callbacks.onComplete(response);
         } else {
+          logger.error(`No response from ${provider}`, { provider, logType: 'error' });
           callbacks.onError(new Error(`No response from ${provider}`));
         }
       }

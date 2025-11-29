@@ -29,6 +29,15 @@ export function useStreamChat() {
       setStreamError(null);
 
       try {
+        const requestBody = {
+          message,
+          conversationId: conversationId || null,
+          provider: provider || null,
+          chatMode: chatMode || 'normal',
+        };
+        
+        console.log('=== useStreamChat: Sending request ===', requestBody);
+        
         const response = await fetch(
           '/api/ai/chat/stream',
           {
@@ -37,12 +46,7 @@ export function useStreamChat() {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({
-              message,
-              conversationId: conversationId || null,
-              provider: provider || null,
-              chatMode: chatMode || 'normal',
-            }),
+            body: JSON.stringify(requestBody),
           }
         );
 

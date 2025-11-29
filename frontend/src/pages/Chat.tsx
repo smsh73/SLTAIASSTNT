@@ -192,6 +192,12 @@ export default function Chat() {
 
     setMessages((prev) => [...prev, assistantMessage]);
 
+    console.log('=== Sending message ===', {
+      chatMode,
+      selectedProvider,
+      conversationId,
+    });
+    
     await streamChat(
       fullMessage,
       conversationId || null,

@@ -81,6 +81,16 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 
 ## Recent Changes
 
+- **2025-11-29**: CLI-Style Log Management & Conversation Auto-Save
+  - Redesigned log management page with CLI/terminal-style interface
+  - Added command-based navigation: `logs`, `search`, `filter`, `stats`, `prompts`
+  - Implemented date range and keyword search for logs
+  - Added prompt statistics display (provider usage, top users, daily activity)
+  - Added log type statistics visualization
+  - Supports command history (arrow keys) and tab autocomplete
+  - Implemented conversation auto-save: messages saved automatically after AI response
+  - New conversations created automatically on first message
+
 - **2025-11-29**: AI Model Updates & Client Caching Fix
   - Updated Gemini model from deprecated `gemini-pro` to `gemini-1.5-flash`
   - Updated Perplexity model from deprecated `llama-3-sonar-large-32k-online` to `sonar-pro`

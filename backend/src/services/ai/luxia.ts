@@ -56,7 +56,16 @@ export async function chatWithLuxia(
 ): Promise<string | null> {
   try {
     const apiKey = await getLuxiaApiKey();
-    if (!apiKey) return null;
+    if (!apiKey) {
+      logger.warning('Luxia API key not available', { logType: 'warning' });
+      return null;
+    }
+
+    logger.info('Luxia chat request starting', {
+      model: options?.model || DEFAULT_MODEL,
+      messageCount: messages.length,
+      logType: 'info',
+    });
 
     const response = await axios.post(
       LUXIA_API_URL,
@@ -77,13 +86,25 @@ export async function chatWithLuxia(
           apikey: apiKey,
           'Content-Type': 'application/json',
         },
+        timeout: 60000,
       }
     );
 
-    return response.data.choices[0]?.message?.content || null;
-  } catch (error) {
+    const content = response.data.choices[0]?.message?.content || null;
+    
+    logger.info('Luxia chat response received', {
+      hasContent: !!content,
+      contentLength: content?.length || 0,
+      logType: 'success',
+    });
+
+    return content;
+  } catch (error: any) {
     logger.error('Luxia chat error', {
       error: error instanceof Error ? error.message : 'Unknown error',
+      status: error?.response?.status,
+      statusText: error?.response?.statusText,
+      responseData: error?.response?.data,
       logType: 'error',
     });
     return null;

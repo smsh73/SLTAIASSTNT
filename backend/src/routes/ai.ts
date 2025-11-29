@@ -56,9 +56,9 @@ router.get(
 
 function getProviderDisplayName(provider: string): string {
   const names: Record<string, string> = {
-    openai: 'OpenAI GPT-4',
-    claude: 'Claude 3 Opus',
-    gemini: 'Google Gemini',
+    openai: 'OpenAI GPT-4o',
+    claude: 'Claude Sonnet 4',
+    gemini: 'Google Gemini 1.5',
     perplexity: 'Perplexity AI',
     luxia: 'Luxia AI',
   };

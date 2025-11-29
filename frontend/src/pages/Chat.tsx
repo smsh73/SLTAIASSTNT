@@ -31,6 +31,7 @@ export default function Chat() {
   const [currentInput, setCurrentInput] = useState('');
   const [showOverlay, setShowOverlay] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [_streamingMessage, setStreamingMessage] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -368,9 +369,11 @@ export default function Chat() {
             <PromptOverlay
               show={showOverlay}
               suggestions={suggestions}
+              loading={suggestionsLoading}
               onSelect={(suggestion) => {
                 setCurrentInput(suggestion);
                 setShowOverlay(false);
+                setSuggestions([]);
               }}
             />
             <ChatInput
@@ -381,6 +384,7 @@ export default function Chat() {
               }}
               onSend={handleSend}
               onSuggestionsChange={setSuggestions}
+              onSuggestionsLoadingChange={setSuggestionsLoading}
               loading={loading}
             />
           </div>

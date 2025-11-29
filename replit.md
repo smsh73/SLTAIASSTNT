@@ -81,6 +81,14 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 
 ## Recent Changes
 
+- **2025-11-29**: Luxia AI Prompt Suggestions
+  - Replaced static template-based suggestions with dynamic Luxia AI suggestions
+  - Prompt overlay now shows real-time AI-generated completions based on user input
+  - Added loading state indicator with animated dots
+  - Improved debounce timing (300ms) for responsive suggestions
+  - Added request cancellation to prevent stale suggestions
+  - Fallback to contextual suggestions when Luxia is unavailable
+
 - **2025-11-29**: System Prompt Enhancement
   - Added Korean timezone date display in all AI system prompts
   - AI agents now include their name as signature at the end of responses (e.g., `*OpenAI GPT-4o*`)

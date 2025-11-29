@@ -6,6 +6,7 @@ interface ChatInputProps {
   onChange: (value: string) => void;
   onSend: (message: string) => void;
   onSuggestionsChange: (suggestions: string[]) => void;
+  onSuggestionsLoadingChange?: (loading: boolean) => void;
   loading: boolean;
 }
 
@@ -14,6 +15,7 @@ export default function ChatInput({
   onChange,
   onSend,
   onSuggestionsChange,
+  onSuggestionsLoadingChange,
   loading,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -25,19 +27,27 @@ export default function ChatInput({
       clearTimeout(debounceRef.current);
     }
     
-    debounceRef.current = setTimeout(() => {
-      if (inputValue) {
-        const wordArray = inputValue.split(/\s+/).filter((w) => w.length > 0);
-        if (wordArray.length > 0) {
-          getSuggestions(wordArray).then((suggestions) => {
-            onSuggestionsChange(suggestions);
-          });
+    if (!inputValue || inputValue.trim().length < 2) {
+      onSuggestionsChange([]);
+      onSuggestionsLoadingChange?.(false);
+      return;
+    }
+    
+    onSuggestionsLoadingChange?.(true);
+    
+    debounceRef.current = setTimeout(async () => {
+      const trimmedValue = inputValue.trim();
+      if (trimmedValue.length >= 2) {
+        const wordArray = trimmedValue.split(/\s+/).filter((w) => w.length > 0);
+        try {
+          const suggestions = await getSuggestions(wordArray);
+          onSuggestionsChange(suggestions);
+        } finally {
+          onSuggestionsLoadingChange?.(false);
         }
-      } else {
-        onSuggestionsChange([]);
       }
-    }, 500);
-  }, [getSuggestions, onSuggestionsChange]);
+    }, 300);
+  }, [getSuggestions, onSuggestionsChange, onSuggestionsLoadingChange]);
 
   useEffect(() => {
     debouncedGetSuggestions(value);
@@ -96,4 +106,3 @@ export default function ChatInput({
     </div>
   );
 }
-

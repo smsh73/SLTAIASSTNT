@@ -84,9 +84,10 @@ export async function orchestrateAIStream(
       logType: 'info',
     });
     
-    if (!provider) {
+    if (!provider || provider === 'auto') {
       const intent = analyzeIntent(userPrompt);
       provider = await selectProvider(intent.preferredProvider) || 'openai';
+      logger.info('Auto-selected provider', { provider, logType: 'info' });
     }
     
     logger.info('Stream orchestration starting', {

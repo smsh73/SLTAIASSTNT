@@ -81,6 +81,11 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 
 ## Recent Changes
 
+- **2025-11-29**: AI Model Updates & Client Caching Fix
+  - Updated Gemini model from deprecated `gemini-pro` to `gemini-1.5-flash`
+  - Updated Perplexity model from deprecated `llama-3-sonar-large-32k-online` to `sonar-pro`
+  - Fixed API client caching: clients now invalidate when API key changes
+
 - **2025-11-29**: A2A (Agent-to-Agent) Mode Implementation
   - Added chat mode selector with Normal/Mix/A2A options
   - Implemented A2A orchestration: 2 collaboration rounds + 2 debate rounds + Luxia synthesis

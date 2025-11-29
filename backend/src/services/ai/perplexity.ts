@@ -50,7 +50,7 @@ export async function chatWithPerplexity(
     const response = await axios.post(
       'https://api.perplexity.ai/chat/completions',
       {
-        model: options?.model || 'llama-3-sonar-large-32k-online',
+        model: options?.model || 'sonar-pro',
         messages: messages.map((m) => ({
           role: m.role,
           content: m.content,

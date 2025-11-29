@@ -9,11 +9,10 @@ const logger = createLogger({
   callerFunction: 'GeminiClient',
 });
 
-let client: GoogleGenerativeAI | null = null;
+let cachedClient: GoogleGenerativeAI | null = null;
+let cachedKeyId: number | null = null;
 
 export async function getGeminiClient(): Promise<GoogleGenerativeAI | null> {
-  if (client) return client;
-
   try {
     const apiKey = await prisma.apiKey.findFirst({
       where: {
@@ -32,11 +31,17 @@ export async function getGeminiClient(): Promise<GoogleGenerativeAI | null> {
       return null;
     }
 
-    // API 키 복호화
-    const decryptedApiKey = decrypt(apiKey.apiKey);
-    client = new GoogleGenerativeAI(decryptedApiKey);
+    if (cachedClient && cachedKeyId === apiKey.id) {
+      return cachedClient;
+    }
 
-    return client;
+    const decryptedApiKey = decrypt(apiKey.apiKey);
+    cachedClient = new GoogleGenerativeAI(decryptedApiKey);
+    cachedKeyId = apiKey.id;
+
+    logger.info('Gemini client initialized', { logType: 'info' });
+
+    return cachedClient;
   } catch (error) {
     logger.error('Failed to initialize Gemini client', {
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -55,7 +60,7 @@ export async function chatWithGemini(
     if (!gemini) return null;
 
     const model = gemini.getGenerativeModel({
-      model: options?.model || 'gemini-pro',
+      model: options?.model || 'gemini-1.5-flash',
     });
 
     // Gemini는 대화 히스토리를 단일 프롬프트로 변환

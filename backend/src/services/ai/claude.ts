@@ -9,11 +9,10 @@ const logger = createLogger({
   callerFunction: 'ClaudeClient',
 });
 
-let client: Anthropic | null = null;
+let cachedClient: Anthropic | null = null;
+let cachedKeyId: number | null = null;
 
 export async function getClaudeClient(): Promise<Anthropic | null> {
-  if (client) return client;
-
   try {
     const apiKey = await prisma.apiKey.findFirst({
       where: {
@@ -32,14 +31,20 @@ export async function getClaudeClient(): Promise<Anthropic | null> {
       return null;
     }
 
-    // API 키 복호화
+    if (cachedClient && cachedKeyId === apiKey.id) {
+      return cachedClient;
+    }
+
     const decryptedApiKey = decrypt(apiKey.apiKey);
 
-    client = new Anthropic({
+    cachedClient = new Anthropic({
       apiKey: decryptedApiKey,
     });
+    cachedKeyId = apiKey.id;
 
-    return client;
+    logger.info('Claude client initialized', { logType: 'info' });
+
+    return cachedClient;
   } catch (error) {
     logger.error('Failed to initialize Claude client', {
       error: error instanceof Error ? error.message : 'Unknown error',

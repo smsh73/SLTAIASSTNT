@@ -749,18 +749,48 @@ async function getProviderResponse(
   provider: string,
   messages: ChatMessage[]
 ): Promise<string | null> {
-  switch (provider) {
-    case 'openai':
-      return getOpenAINonStream(messages);
-    case 'claude':
-      return chatWithClaude(messages);
-    case 'gemini':
-      return chatWithGemini(messages);
-    case 'perplexity':
-      return chatWithPerplexity(messages);
-    case 'luxia':
-      return chatWithLuxia(messages);
-    default:
-      return null;
+  logger.info(`getProviderResponse: Starting call to ${provider}`, {
+    messageCount: messages.length,
+    logType: 'info',
+  });
+  
+  try {
+    let response: string | null = null;
+    
+    switch (provider) {
+      case 'openai':
+        response = await getOpenAINonStream(messages);
+        break;
+      case 'claude':
+        response = await chatWithClaude(messages);
+        break;
+      case 'gemini':
+        response = await chatWithGemini(messages);
+        break;
+      case 'perplexity':
+        response = await chatWithPerplexity(messages);
+        break;
+      case 'luxia':
+        response = await chatWithLuxia(messages);
+        break;
+      default:
+        logger.warning(`getProviderResponse: Unknown provider ${provider}`, { logType: 'warning' });
+        return null;
+    }
+    
+    logger.info(`getProviderResponse: ${provider} completed`, {
+      hasResponse: !!response,
+      responseLength: response?.length || 0,
+      logType: response ? 'success' : 'warning',
+    });
+    
+    return response;
+  } catch (error) {
+    logger.error(`getProviderResponse: ${provider} error`, {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      logType: 'error',
+    });
+    throw error;
   }
 }

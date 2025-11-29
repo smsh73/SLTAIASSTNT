@@ -35,13 +35,13 @@ app.use(metricsMiddleware);
 // Rate limiting
 app.use('/api/', createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15분
-  maxRequests: 100, // 기본 제한
+  maxRequests: 500, // 기본 제한 (증가)
 }));
 
-// AI API는 더 엄격한 제한
+// AI API - A2A 모드는 여러 에이전트를 호출하므로 충분한 제한 필요
 app.use('/api/ai/', createRateLimiter({
   windowMs: 60 * 1000, // 1분
-  maxRequests: 20,
+  maxRequests: 100, // A2A 모드 지원을 위해 증가
 }));
 
 // Serve uploaded files

@@ -60,7 +60,7 @@ export async function chatWithGemini(
     if (!gemini) return null;
 
     const model = gemini.getGenerativeModel({
-      model: options?.model || 'gemini-1.5-flash',
+      model: options?.model || 'gemini-1.5-pro',
     });
 
     // Gemini는 대화 히스토리를 단일 프롬프트로 변환

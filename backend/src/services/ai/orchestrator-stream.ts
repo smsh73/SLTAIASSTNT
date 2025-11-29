@@ -5,7 +5,7 @@ import { chatWithOpenAIStream } from './openai-stream.js';
 import { chatWithClaude } from './claude.js';
 import { chatWithGemini } from './gemini.js';
 import { chatWithPerplexity } from './perplexity.js';
-import { chatWithLuxia } from './luxia.js';
+import { chatWithLuxia, streamLuxia } from './luxia.js';
 import { selectProvider } from './weightManager.js';
 import { analyzeIntent } from './intentAnalyzer.js';
 

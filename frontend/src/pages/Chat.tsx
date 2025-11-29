@@ -31,10 +31,10 @@ export default function Chat() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [streamingMessage, setStreamingMessage] = useState<string>('');
+  const [_streamingMessage, setStreamingMessage] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { token } = useAuthStore();
-  const { streamChat, isStreaming } = useStreamChat();
+  const { streamChat } = useStreamChat();
 
   const [providers, setProviders] = useState<AIProvider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>('auto');

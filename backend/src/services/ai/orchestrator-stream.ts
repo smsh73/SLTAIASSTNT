@@ -14,6 +14,46 @@ const logger = createLogger({
   callerFunction: 'OrchestratorStream',
 });
 
+function getKoreanDate(): string {
+  const now = new Date();
+  const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+  const year = koreaTime.getFullYear();
+  const month = koreaTime.getMonth() + 1;
+  const day = koreaTime.getDate();
+  const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+  const weekday = weekdays[koreaTime.getDay()];
+  return `${year}년 ${month}월 ${day}일 (${weekday}요일)`;
+}
+
+function buildSystemPrompt(provider: string): string {
+  const koreanDate = getKoreanDate();
+  const providerName = getProviderName(provider);
+  
+  return `오늘 날짜는 ${koreanDate}입니다. (한국 표준시 기준)
+당신은 ${providerName} AI 어시스턴트입니다.
+사용자의 질문에 친절하고 정확하게 답변해주세요.
+한국어로 답변하세요.
+
+중요: 답변의 마지막에 반드시 다음 형식으로 시그니처를 추가하세요:
+---
+*${providerName}*`;
+}
+
+function addSystemPromptToMessages(messages: ChatMessage[], provider: string): ChatMessage[] {
+  const systemPrompt = buildSystemPrompt(provider);
+  const hasSystemMessage = messages.some(m => m.role === 'system');
+  
+  if (hasSystemMessage) {
+    return messages.map(m => 
+      m.role === 'system' 
+        ? { ...m, content: `${systemPrompt}\n\n${m.content}` }
+        : m
+    );
+  }
+  
+  return [{ role: 'system', content: systemPrompt }, ...messages];
+}
+
 export interface StreamCallbacks {
   onChunk: (chunk: string) => void;
   onComplete: (fullResponse: string) => void;
@@ -84,12 +124,13 @@ async function handleSingleProvider(
   callbacks: StreamCallbacks
 ): Promise<void> {
   const circuitBreaker = getCircuitBreaker(provider);
+  const messagesWithSystem = addSystemPromptToMessages(messages, provider);
   
   await circuitBreaker.execute(
     async () => {
       if (provider === 'openai') {
         let fullResponse = '';
-        await chatWithOpenAIStream(messages, {
+        await chatWithOpenAIStream(messagesWithSystem, {
           onChunk: (chunk: string) => {
             fullResponse += chunk;
             callbacks.onChunk(chunk);
@@ -102,22 +143,22 @@ async function handleSingleProvider(
           },
         });
       } else if (provider === 'luxia') {
-        await handleLuxiaStream(messages, callbacks);
+        await handleLuxiaStream(messagesWithSystem, callbacks);
       } else {
         let response: string | null = null;
         
         switch (provider) {
           case 'claude':
-            response = await chatWithClaude(messages);
+            response = await chatWithClaude(messagesWithSystem);
             break;
           case 'gemini':
-            response = await chatWithGemini(messages);
+            response = await chatWithGemini(messagesWithSystem);
             break;
           case 'perplexity':
-            response = await chatWithPerplexity(messages);
+            response = await chatWithPerplexity(messagesWithSystem);
             break;
           default:
-            response = await chatWithClaude(messages);
+            response = await chatWithClaude(messagesWithSystem);
         }
         
         if (response) {
@@ -152,10 +193,12 @@ async function handleMixOfAgents(
       callbacks.onChunk(providerHeader);
       fullResponse += providerHeader;
       
+      const messagesWithSystem = addSystemPromptToMessages(messages, provider);
+      
       if (provider === 'openai') {
         let providerResponse = providerHeader;
         
-        await chatWithOpenAIStream(messages, {
+        await chatWithOpenAIStream(messagesWithSystem, {
           onChunk: (chunk: string) => {
             providerResponse += chunk;
             fullResponse += chunk;
@@ -182,10 +225,10 @@ async function handleMixOfAgents(
         
         switch (provider) {
           case 'claude':
-            response = await chatWithClaude(messages);
+            response = await chatWithClaude(messagesWithSystem);
             break;
           case 'gemini':
-            response = await chatWithGemini(messages);
+            response = await chatWithGemini(messagesWithSystem);
             break;
         }
         
@@ -584,26 +627,40 @@ function buildA2AContextMessages(
   round: number
 ): ChatMessage[] {
   const messages: ChatMessage[] = [];
+  const koreanDate = getKoreanDate();
+  const providerName = getProviderName(currentProvider);
   
   let systemPrompt = '';
   
   if (phase === 'collaboration') {
-    systemPrompt = `당신은 ${getProviderName(currentProvider)}입니다. 다른 AI 에이전트들과 함께 협력하여 사용자의 질문에 대한 최적의 답변을 도출하는 토론에 참여하고 있습니다.
+    systemPrompt = `오늘 날짜는 ${koreanDate}입니다. (한국 표준시 기준)
+
+당신은 ${providerName}입니다. 다른 AI 에이전트들과 함께 협력하여 사용자의 질문에 대한 최적의 답변을 도출하는 토론에 참여하고 있습니다.
 
 지금은 협력적 인사이트 공유 단계 ${round}라운드입니다.
 - 이전 발언자들의 의견을 참고하여 새로운 관점이나 보완적인 인사이트를 제시하세요.
 - 다른 에이전트의 좋은 아이디어는 인정하고 발전시키세요.
 - 간결하면서도 핵심적인 내용을 담아 2-3문단 이내로 답변하세요.
-- 한국어로 답변하세요.`;
+- 한국어로 답변하세요.
+
+중요: 답변의 마지막에 반드시 다음 형식으로 시그니처를 추가하세요:
+---
+*${providerName}*`;
   } else {
-    systemPrompt = `당신은 ${getProviderName(currentProvider)}입니다. 다른 AI 에이전트들과 함께 토론하며 답변을 개선하고 있습니다.
+    systemPrompt = `오늘 날짜는 ${koreanDate}입니다. (한국 표준시 기준)
+
+당신은 ${providerName}입니다. 다른 AI 에이전트들과 함께 토론하며 답변을 개선하고 있습니다.
 
 지금은 토론 및 보완 단계 ${round}라운드입니다.
 - 지금까지의 논의에서 부족한 점이나 보완이 필요한 부분을 지적하세요.
 - 건설적인 비평과 함께 개선된 인사이트를 제안하세요.
 - 다른 에이전트들의 의견 중 동의하지 않는 부분이 있다면 논리적으로 반박하세요.
 - 간결하면서도 핵심적인 내용을 담아 2-3문단 이내로 답변하세요.
-- 한국어로 답변하세요.`;
+- 한국어로 답변하세요.
+
+중요: 답변의 마지막에 반드시 다음 형식으로 시그니처를 추가하세요:
+---
+*${providerName}*`;
   }
 
   messages.push({ role: 'system', content: systemPrompt });
@@ -626,14 +683,22 @@ function buildSynthesisMessages(
   userPrompt: string,
   history: { provider: string; content: string; phase: string; round: number }[]
 ): ChatMessage[] {
-  const systemPrompt = `당신은 Luxia AI입니다. 여러 AI 에이전트들의 협력적 토론 결과를 종합하여 최종 답변을 제시하는 역할을 맡고 있습니다.
+  const koreanDate = getKoreanDate();
+  
+  const systemPrompt = `오늘 날짜는 ${koreanDate}입니다. (한국 표준시 기준)
+
+당신은 Luxia AI입니다. 여러 AI 에이전트들의 협력적 토론 결과를 종합하여 최종 답변을 제시하는 역할을 맡고 있습니다.
 
 다음 사항을 고려하여 최종 종합 답변을 작성하세요:
 1. 모든 에이전트들의 핵심 인사이트를 통합하세요.
 2. 토론 과정에서 합의된 내용과 개선된 점을 반영하세요.
 3. 상충되는 의견이 있었다면 가장 논리적이고 타당한 결론을 도출하세요.
 4. 실용적이고 실행 가능한 최종 답변을 구성하세요.
-5. 한국어로 답변하세요.`;
+5. 한국어로 답변하세요.
+
+중요: 답변의 마지막에 반드시 다음 형식으로 시그니처를 추가하세요:
+---
+*Luxia AI*`;
 
   let conversationSummary = `원래 질문: ${userPrompt}\n\n=== 토론 전체 내용 ===\n\n`;
 

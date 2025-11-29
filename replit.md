@@ -81,6 +81,12 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 
 ## Recent Changes
 
+- **2025-11-29**: System Prompt Enhancement
+  - Added Korean timezone date display in all AI system prompts
+  - AI agents now include their name as signature at the end of responses (e.g., `*OpenAI GPT-4o*`)
+  - Updated provider display names to latest models (OpenAI GPT-4o, Claude Sonnet 4, Gemini 1.5)
+  - Applied to Normal, Mix of Agents, and A2A modes
+
 - **2025-11-29**: CLI-Style Log Management & Conversation Auto-Save
   - Redesigned log management page with CLI/terminal-style interface
   - Added command-based navigation: `logs`, `search`, `filter`, `stats`, `prompts`

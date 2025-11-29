@@ -52,14 +52,24 @@ router.post(
     });
 
     try {
-      const { message, conversationId: existingConversationId, provider, chatMode } = req.body;
+      const { message, conversationId: existingConversationId, provider, chatMode: rawChatMode, mixOfAgents } = req.body;
+      
+      // chatMode 결정: chatMode 필드 우선, mixOfAgents는 레거시 지원
+      let chatMode = rawChatMode;
+      if (!chatMode && mixOfAgents === true) {
+        chatMode = 'mix';
+      }
+      if (!chatMode) {
+        chatMode = 'normal';
+      }
 
       logger.info('=== RAW REQUEST BODY ===', {
         rawBody: JSON.stringify(req.body),
         message: message?.substring(0, 50),
         provider,
-        chatMode,
-        chatModeType: typeof chatMode,
+        rawChatMode,
+        mixOfAgents,
+        resolvedChatMode: chatMode,
         logType: 'info',
       });
 

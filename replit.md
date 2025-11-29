@@ -32,7 +32,7 @@ A fullstack AI assistant application with a React + Vite frontend and Node.js + 
 - **Frontend**: React 18, Vite 5, TypeScript, TailwindCSS, Zustand
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM
 - **Database**: PostgreSQL (Neon)
-- **AI Services**: OpenAI, Claude, Gemini, Perplexity (configurable)
+- **AI Services**: OpenAI, Claude, Gemini, Perplexity, Luxia (configurable)
 
 ## Development
 
@@ -62,6 +62,12 @@ This starts both frontend (port 5000) and backend (port 3001) concurrently.
 Access Swagger API docs at `/api-docs` when the backend is running.
 
 ## Recent Changes
+
+- **2025-11-29**: Luxia API & Provider Auto-Display
+  - Updated Luxia API to match official documentation (https://bridge.luxiacloud.com/luxia/v1/chat)
+  - Changed authentication from Bearer token to `apikey` header as per Luxia spec
+  - Added streaming support for Luxia with fallback to non-streaming on error
+  - AI provider dropdown now automatically shows only providers with stored API keys
 
 - **2025-11-29**: System Configuration & Security Improvements
   - Added admin settings API (`/api/admin/settings`) for managing system configuration

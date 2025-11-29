@@ -38,7 +38,7 @@ export default function Chat() {
 
   const [providers, setProviders] = useState<AIProvider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>('auto');
-  const [mixOfAgents, setMixOfAgents] = useState(false);
+  const [chatMode, setChatMode] = useState<'normal' | 'mix' | 'a2a'>('normal');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -167,7 +167,7 @@ export default function Chat() {
       fullMessage,
       conversationId || null,
       selectedProvider !== 'auto' ? selectedProvider : undefined,
-      mixOfAgents,
+      chatMode,
       (chunk: string) => {
         setStreamingMessage((prev) => {
           const newContent = prev + chunk;
@@ -254,16 +254,17 @@ export default function Chat() {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600 cursor-pointer flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={mixOfAgents}
-                  onChange={(e) => setMixOfAgents(e.target.checked)}
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                  disabled={loading}
-                />
-                Mix of Agents
-              </label>
+              <label className="text-sm text-gray-600">대화 모드:</label>
+              <select
+                value={chatMode}
+                onChange={(e) => setChatMode(e.target.value as 'normal' | 'mix' | 'a2a')}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                disabled={loading}
+              >
+                <option value="normal">일반</option>
+                <option value="mix">Mix of Agents</option>
+                <option value="a2a">A2A 협력 토론</option>
+              </select>
             </div>
 
             <div className="flex-1"></div>

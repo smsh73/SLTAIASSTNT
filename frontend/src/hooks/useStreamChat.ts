@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useAuthStore } from '../store/authStore';
 
+type ChatMode = 'normal' | 'mix' | 'a2a';
+
 interface StreamMessage {
   type: 'chunk' | 'complete' | 'error';
   content?: string;
@@ -17,7 +19,7 @@ export function useStreamChat() {
       message: string,
       conversationId: string | null,
       provider?: string,
-      mixOfAgents?: boolean,
+      chatMode?: ChatMode,
       onChunk?: (chunk: string) => void,
       onComplete?: (fullResponse: string) => void,
       onError?: (error: string) => void
@@ -38,7 +40,7 @@ export function useStreamChat() {
               message,
               conversationId: conversationId || null,
               provider: provider || null,
-              mixOfAgents: mixOfAgents || false,
+              chatMode: chatMode || 'normal',
             }),
           }
         );

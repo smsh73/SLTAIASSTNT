@@ -155,7 +155,6 @@ export async function getContextMessages(
       take: maxMessages,
     });
 
-    // 최신 메시지부터 오래된 순서로 반환
     return messages
       .reverse()
       .map((m) => ({
@@ -169,6 +168,62 @@ export async function getContextMessages(
       logType: 'error',
     });
     return [];
+  }
+}
+
+export async function addMessage(
+  conversationId: number,
+  userId: number,
+  role: 'user' | 'assistant',
+  content: string,
+  provider?: string
+): Promise<void> {
+  try {
+    await prisma.message.create({
+      data: {
+        conversationId,
+        userId,
+        role,
+        content,
+        provider,
+      },
+    });
+
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { updatedAt: new Date() },
+    });
+
+    logger.debug('Message added to conversation', {
+      conversationId,
+      role,
+      logType: 'success',
+    });
+  } catch (error) {
+    logger.error('Failed to add message', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      conversationId,
+      logType: 'error',
+    });
+    throw error;
+  }
+}
+
+export async function updateConversationTitle(
+  conversationId: number,
+  title: string
+): Promise<void> {
+  try {
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { title },
+    });
+  } catch (error) {
+    logger.error('Failed to update conversation title', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      conversationId,
+      logType: 'error',
+    });
   }
 }
 

@@ -4,9 +4,10 @@ import { useAuthStore } from '../store/authStore';
 type ChatMode = 'normal' | 'mix' | 'a2a';
 
 interface StreamMessage {
-  type: 'chunk' | 'complete' | 'error';
+  type: 'chunk' | 'complete' | 'error' | 'conversationId';
   content?: string;
   message?: string;
+  conversationId?: number;
 }
 
 export function useStreamChat() {
@@ -21,7 +22,7 @@ export function useStreamChat() {
       provider?: string,
       chatMode?: ChatMode,
       onChunk?: (chunk: string) => void,
-      onComplete?: (fullResponse: string) => void,
+      onComplete?: (fullResponse: string, newConversationId?: number) => void,
       onError?: (error: string) => void
     ) => {
       setIsStreaming(true);
@@ -70,17 +71,21 @@ export function useStreamChat() {
           const lines = buffer.split('\n\n');
           buffer = lines.pop() || '';
 
+          let newConversationId: number | undefined;
+          
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               try {
                 const data: StreamMessage = JSON.parse(line.substring(6));
 
-                if (data.type === 'chunk' && data.content) {
+                if (data.type === 'conversationId' && data.conversationId) {
+                  newConversationId = data.conversationId;
+                } else if (data.type === 'chunk' && data.content) {
                   fullResponse += data.content;
                   onChunk?.(data.content);
                 } else if (data.type === 'complete' && data.content) {
                   fullResponse = data.content;
-                  onComplete?.(fullResponse);
+                  onComplete?.(fullResponse, newConversationId || data.conversationId);
                 } else if (data.type === 'error') {
                   const errorMessage = data.message || 'Stream error';
                   setStreamError(errorMessage);

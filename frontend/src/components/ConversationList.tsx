@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -17,14 +17,8 @@ export default function ConversationList() {
   const navigate = useNavigate();
   const fetchedRef = useRef(false);
 
-  useEffect(() => {
-    if (token && !fetchedRef.current) {
-      fetchedRef.current = true;
-      fetchConversations();
-    }
-  }, [token]);
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
+    if (!token) return;
     try {
       const response = await axios.get(
         '/api/conversations',
@@ -42,7 +36,25 @@ export default function ConversationList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token && !fetchedRef.current) {
+      fetchedRef.current = true;
+      fetchConversations();
+    }
+  }, [token, fetchConversations]);
+  
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchConversations();
+    };
+    
+    window.addEventListener('refreshConversations', handleRefresh);
+    return () => {
+      window.removeEventListener('refreshConversations', handleRefresh);
+    };
+  }, [fetchConversations]);
 
   if (loading) {
     return <div className="text-gray-500">로딩 중...</div>;

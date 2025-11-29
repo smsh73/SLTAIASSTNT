@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import ChatInput from '../components/ChatInput';
 import PromptOverlay from '../components/PromptOverlay';
 import DocumentPreview from '../components/DocumentPreview';
@@ -26,6 +26,7 @@ interface UploadedFile {
 
 export default function Chat() {
   const { conversationId } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentInput, setCurrentInput] = useState('');
   const [showOverlay, setShowOverlay] = useState(false);
@@ -42,6 +43,10 @@ export default function Chat() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const refreshConversationList = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('refreshConversations'));
+  }, []);
 
   useEffect(() => {
     loadProviders();
@@ -181,7 +186,7 @@ export default function Chat() {
           return newContent;
         });
       },
-      (fullResponse: string) => {
+      (fullResponse: string, newConversationId?: number) => {
         setStreamingMessage('');
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
@@ -191,6 +196,11 @@ export default function Chat() {
           )
         );
         setLoading(false);
+        
+        if (newConversationId && !conversationId) {
+          navigate(`/chat/${newConversationId}`, { replace: true });
+          refreshConversationList();
+        }
       },
       (error: string) => {
         console.error('Stream error:', error);

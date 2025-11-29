@@ -5,6 +5,7 @@ import { orchestrateAIStream } from '../services/ai/orchestrator-stream.js';
 import { createLogger } from '../utils/logger.js';
 import { aiSchemas } from '../utils/validation.js';
 import { validateInput } from '../middleware/security.js';
+import { createSession, addMessage, updateConversationTitle } from '../services/conversations/session.js';
 
 const router = Router();
 const logger = createLogger({
@@ -51,10 +52,7 @@ router.post(
     });
 
     try {
-      const { message, conversationId, provider, chatMode } = req.body;
-
-      console.log('[DEBUG] AI Stream - Full Request Body:', JSON.stringify(req.body));
-      console.log('[DEBUG] AI Stream - Parsed chatMode:', chatMode, '| Type:', typeof chatMode);
+      const { message, conversationId: existingConversationId, provider, chatMode } = req.body;
 
       // 프롬프트 검증
       const validation = await validatePrompt(message);
@@ -68,16 +66,40 @@ router.post(
         return;
       }
 
+      // 대화 ID 결정: 기존 대화가 없으면 새로 생성
+      let activeConversationId = existingConversationId;
+      let isNewConversation = false;
+      
+      if (!activeConversationId) {
+        const title = message.length > 30 ? message.substring(0, 30) + '...' : message;
+        const session = await createSession(req.userId!, title);
+        activeConversationId = session.id;
+        isNewConversation = true;
+        logger.info('New conversation created', {
+          userId: req.userId,
+          conversationId: activeConversationId,
+          logType: 'info',
+        });
+      }
+
+      // 사용자 메시지 저장
+      await addMessage(activeConversationId, req.userId!, 'user', message);
+
       // SSE 헤더 설정
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
-      res.setHeader('X-Accel-Buffering', 'no'); // Nginx 버퍼링 비활성화
+      res.setHeader('X-Accel-Buffering', 'no');
+
+      // 새 대화인 경우 conversationId를 클라이언트에 전송
+      if (isNewConversation) {
+        res.write(`data: ${JSON.stringify({ type: 'conversationId', conversationId: activeConversationId })}\n\n`);
+      }
 
       // 스트리밍 시작
       logger.info('Starting AI stream', {
         userId: req.userId,
-        conversationId,
+        conversationId: activeConversationId,
         provider: provider || 'auto',
         chatMode: chatMode || 'normal',
         logType: 'info',
@@ -95,8 +117,22 @@ router.post(
           onChunk: (chunk: string) => {
             res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
           },
-          onComplete: (fullResponse: string) => {
-            res.write(`data: ${JSON.stringify({ type: 'complete', content: fullResponse })}\n\n`);
+          onComplete: async (fullResponse: string) => {
+            // AI 응답 저장
+            try {
+              await addMessage(activeConversationId, req.userId!, 'assistant', fullResponse, provider || 'auto');
+              logger.info('Conversation saved', {
+                userId: req.userId,
+                conversationId: activeConversationId,
+                logType: 'success',
+              });
+            } catch (saveError) {
+              logger.error('Failed to save AI response', {
+                error: saveError instanceof Error ? saveError.message : 'Unknown',
+                logType: 'error',
+              });
+            }
+            res.write(`data: ${JSON.stringify({ type: 'complete', content: fullResponse, conversationId: activeConversationId })}\n\n`);
             res.end();
           },
           onError: (error: Error) => {

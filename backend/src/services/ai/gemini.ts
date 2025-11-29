@@ -57,13 +57,22 @@ export async function chatWithGemini(
 ): Promise<string | null> {
   try {
     const gemini = await getGeminiClient();
-    if (!gemini) return null;
+    if (!gemini) {
+      logger.warning('Gemini client not available', { logType: 'warning' });
+      return null;
+    }
 
-    const model = gemini.getGenerativeModel({
-      model: options?.model || 'gemini-2.0-flash',
+    const modelName = options?.model || 'gemini-1.5-flash-latest';
+    logger.info('Gemini chat starting', {
+      model: modelName,
+      messageCount: messages.length,
+      logType: 'info',
     });
 
-    // Gemini는 대화 히스토리를 단일 프롬프트로 변환
+    const model = gemini.getGenerativeModel({
+      model: modelName,
+    });
+
     const prompt = messages
       .map((m) => {
         const role = m.role === 'user' ? 'User' : m.role === 'assistant' ? 'Assistant' : 'System';
@@ -79,10 +88,19 @@ export async function chatWithGemini(
     });
 
     const response = result.response;
-    return response.text() || null;
-  } catch (error) {
+    const text = response.text() || null;
+    
+    logger.info('Gemini chat response received', {
+      hasContent: !!text,
+      contentLength: text?.length || 0,
+      logType: 'success',
+    });
+
+    return text;
+  } catch (error: any) {
     logger.error('Gemini chat error', {
       error: error instanceof Error ? error.message : 'Unknown error',
+      errorDetails: error?.message,
       logType: 'error',
     });
     return null;

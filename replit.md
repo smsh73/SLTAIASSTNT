@@ -61,7 +61,31 @@ This starts both frontend (port 5000) and backend (port 3001) concurrently.
 
 Access Swagger API docs at `/api-docs` when the backend is running.
 
+## Chat Modes
+
+The application supports three chat modes:
+
+| Mode | Description |
+|------|-------------|
+| **일반 (Normal)** | Single AI provider responds to queries |
+| **Mix of Agents** | Multiple AI providers respond separately for comparison |
+| **A2A 협력 토론** | Agent-to-Agent collaborative mode with multi-round discussion |
+
+### A2A Mode Details
+
+The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple AI agents:
+
+1. **Phase 1: Collaboration (2 rounds)** - Each agent (OpenAI, Claude, Gemini, Perplexity) shares insights, building on previous contributions
+2. **Phase 2: Debate (2 rounds)** - Agents critique and improve upon the discussion, identifying gaps and proposing enhancements
+3. **Phase 3: Synthesis** - Luxia AI synthesizes all contributions into a comprehensive final answer
+
 ## Recent Changes
+
+- **2025-11-29**: A2A (Agent-to-Agent) Mode Implementation
+  - Added chat mode selector with Normal/Mix/A2A options
+  - Implemented A2A orchestration: 2 collaboration rounds + 2 debate rounds + Luxia synthesis
+  - Streaming support with progressive word-by-word output for A2A responses
+  - Fallback to Claude if Luxia synthesis fails
 
 - **2025-11-29**: Luxia API & Provider Auto-Display
   - Updated Luxia API to match official documentation (https://bridge.luxiacloud.com/luxia/v1/chat)

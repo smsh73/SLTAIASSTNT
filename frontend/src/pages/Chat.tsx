@@ -48,6 +48,16 @@ export default function Chat() {
     window.dispatchEvent(new CustomEvent('refreshConversations'));
   }, []);
 
+  const resetConversation = useCallback(() => {
+    setMessages([]);
+    setCurrentInput('');
+    setStreamingMessage('');
+    setUploadedFiles([]);
+    setLoading(false);
+    setChatMode('normal');
+    setSelectedProvider('auto');
+  }, []);
+
   useEffect(() => {
     loadProviders();
   }, []);
@@ -55,8 +65,22 @@ export default function Chat() {
   useEffect(() => {
     if (conversationId) {
       loadConversation(conversationId);
+    } else {
+      resetConversation();
     }
-  }, [conversationId]);
+  }, [conversationId, resetConversation]);
+
+  useEffect(() => {
+    const handleNewConversation = () => {
+      resetConversation();
+      navigate('/chat', { replace: true });
+    };
+    
+    window.addEventListener('newConversation', handleNewConversation);
+    return () => {
+      window.removeEventListener('newConversation', handleNewConversation);
+    };
+  }, [navigate, resetConversation]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -1,12 +1,21 @@
 import { useState } from 'react';
 import ConversationList from './ConversationList';
 import { useAuthStore } from '../store/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNewConversation = () => {
+    if (location.pathname === '/chat' || location.pathname.startsWith('/chat/')) {
+      window.dispatchEvent(new CustomEvent('newConversation'));
+    } else {
+      navigate('/chat');
+    }
+  };
 
   return (
     <div
@@ -29,7 +38,7 @@ export default function Sidebar() {
       {!isCollapsed && (
         <div className="flex-1 overflow-y-auto p-4">
           <button
-            onClick={() => navigate('/chat')}
+            onClick={handleNewConversation}
             className="w-full mb-4 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors"
           >
             + 새 대화

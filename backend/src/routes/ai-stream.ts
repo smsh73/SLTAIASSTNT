@@ -54,6 +54,15 @@ router.post(
     try {
       const { message, conversationId: existingConversationId, provider, chatMode } = req.body;
 
+      logger.info('=== RAW REQUEST BODY ===', {
+        rawBody: JSON.stringify(req.body),
+        message: message?.substring(0, 50),
+        provider,
+        chatMode,
+        chatModeType: typeof chatMode,
+        logType: 'info',
+      });
+
       // 프롬프트 검증
       const validation = await validatePrompt(message);
       if (!validation.isValid) {

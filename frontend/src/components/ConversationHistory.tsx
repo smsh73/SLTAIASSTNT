@@ -1,8 +1,19 @@
 import { Message } from '../types/message';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ConversationHistoryProps {
   messages: Message[];
 }
+
+const MarkdownRenderer = ({ content }: { content: string }) => {
+  return (
+    // @ts-expect-error - React 18 type compatibility issue with react-markdown
+    <Markdown remarkPlugins={[remarkGfm]}>
+      {content}
+    </Markdown>
+  );
+};
 
 export default function ConversationHistory({
   messages,
@@ -23,7 +34,13 @@ export default function ConversationHistory({
                 : 'bg-white text-gray-800 shadow-sm border border-gray-200'
             }`}
           >
-            <div className="whitespace-pre-wrap">{message.content}</div>
+            {message.role === 'user' ? (
+              <div className="whitespace-pre-wrap">{message.content}</div>
+            ) : (
+              <div className="prose prose-sm max-w-none prose-headings:text-gray-800 prose-p:text-gray-700 prose-strong:text-gray-800 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700">
+                <MarkdownRenderer content={message.content} />
+              </div>
+            )}
             <div
               className={`text-xs mt-2 ${
                 message.role === 'user'

@@ -346,6 +346,12 @@ async function handleA2AMode(
   const conversationHistory: { provider: string; content: string; phase: string; round: number }[] = [];
   let fullResponse = '';
 
+  logger.info('A2A mode started', {
+    providers: providers.join(', '),
+    userPrompt: userPrompt.substring(0, 50),
+    logType: 'info',
+  });
+
   const header = `## A2A 협력 토론 모드\n\n여러 AI 에이전트가 협력하여 최적의 답변을 도출합니다.\n\n**주제**: ${userPrompt}\n\n---\n\n`;
   fullResponse += header;
   callbacks.onChunk(header);
@@ -361,6 +367,10 @@ async function handleA2AMode(
 
     for (const provider of providers) {
       try {
+        logger.info(`A2A: Calling ${provider} for collaboration round ${round}`, {
+          logType: 'info',
+        });
+
         const providerHeader = `**${getProviderName(provider)}**:\n`;
         fullResponse += providerHeader;
         callbacks.onChunk(providerHeader);
@@ -374,6 +384,12 @@ async function handleA2AMode(
         );
 
         const response = await getProviderResponse(provider, contextMessages);
+        
+        logger.info(`A2A: ${provider} response received`, {
+          hasResponse: !!response,
+          responseLength: response?.length || 0,
+          logType: 'info',
+        });
         
         if (response) {
           const words = response.split(' ');
@@ -401,7 +417,7 @@ async function handleA2AMode(
           fullResponse += footer;
           callbacks.onChunk(footer);
         } else {
-          const noResponse = '*응답을 받지 못했습니다.*\n\n';
+          const noResponse = `*${getProviderName(provider)} API 키가 설정되지 않았거나 응답을 받지 못했습니다.*\n\n`;
           fullResponse += noResponse;
           callbacks.onChunk(noResponse);
         }
@@ -410,7 +426,7 @@ async function handleA2AMode(
           error: error instanceof Error ? error.message : 'Unknown',
           logType: 'warning',
         });
-        const errorText = `*오류 발생*\n\n`;
+        const errorText = `*${getProviderName(provider)} 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}*\n\n`;
         fullResponse += errorText;
         callbacks.onChunk(errorText);
       }
@@ -428,6 +444,10 @@ async function handleA2AMode(
 
     for (const provider of providers) {
       try {
+        logger.info(`A2A: Calling ${provider} for debate round ${round}`, {
+          logType: 'info',
+        });
+
         const providerHeader = `**${getProviderName(provider)}**:\n`;
         fullResponse += providerHeader;
         callbacks.onChunk(providerHeader);
@@ -441,6 +461,12 @@ async function handleA2AMode(
         );
 
         const response = await getProviderResponse(provider, contextMessages);
+        
+        logger.info(`A2A: ${provider} debate response received`, {
+          hasResponse: !!response,
+          responseLength: response?.length || 0,
+          logType: 'info',
+        });
         
         if (response) {
           const words = response.split(' ');
@@ -468,7 +494,7 @@ async function handleA2AMode(
           fullResponse += footer;
           callbacks.onChunk(footer);
         } else {
-          const noResponse = '*응답을 받지 못했습니다.*\n\n';
+          const noResponse = `*${getProviderName(provider)} API 키가 설정되지 않았거나 응답을 받지 못했습니다.*\n\n`;
           fullResponse += noResponse;
           callbacks.onChunk(noResponse);
         }
@@ -477,7 +503,7 @@ async function handleA2AMode(
           error: error instanceof Error ? error.message : 'Unknown',
           logType: 'warning',
         });
-        const errorText = `*오류 발생*\n\n`;
+        const errorText = `*${getProviderName(provider)} 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}*\n\n`;
         fullResponse += errorText;
         callbacks.onChunk(errorText);
       }

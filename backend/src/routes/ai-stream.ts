@@ -53,13 +53,8 @@ router.post(
     try {
       const { message, conversationId, provider, chatMode } = req.body;
 
-      console.log('[DEBUG] AI Stream Request Body:', JSON.stringify({
-        message: message?.substring(0, 50) + '...',
-        conversationId,
-        provider,
-        chatMode,
-        rawChatMode: req.body.chatMode,
-      }));
+      console.log('[DEBUG] AI Stream - Full Request Body:', JSON.stringify(req.body));
+      console.log('[DEBUG] AI Stream - Parsed chatMode:', chatMode, '| Type:', typeof chatMode);
 
       // 프롬프트 검증
       const validation = await validatePrompt(message);

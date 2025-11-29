@@ -37,6 +37,13 @@ export async function orchestrateAIStream(
     let provider = options?.preferredProvider;
     const chatMode = options?.chatMode || 'normal';
     
+    logger.info('=== ORCHESTRATION START ===', {
+      receivedChatMode: chatMode,
+      receivedProvider: provider,
+      optionsRaw: JSON.stringify(options),
+      logType: 'info',
+    });
+    
     if (!provider) {
       const intent = analyzeIntent(userPrompt);
       provider = await selectProvider(intent.preferredProvider) || 'openai';
@@ -48,16 +55,20 @@ export async function orchestrateAIStream(
       logType: 'info',
     });
 
-    switch (chatMode) {
-      case 'mix':
-        await handleMixOfAgents(messages, callbacks);
-        break;
-      case 'a2a':
-        await handleA2AMode(messages, userPrompt, callbacks);
-        break;
-      default:
-        await handleSingleProvider(messages, provider, callbacks);
+    if (chatMode === 'a2a') {
+      logger.info('=== A2A MODE DETECTED - Starting A2A handler ===', { logType: 'info' });
+      await handleA2AMode(messages, userPrompt, callbacks);
+      return;
     }
+    
+    if (chatMode === 'mix') {
+      logger.info('=== MIX MODE DETECTED - Starting Mix handler ===', { logType: 'info' });
+      await handleMixOfAgents(messages, callbacks);
+      return;
+    }
+    
+    logger.info('=== NORMAL MODE - Starting single provider ===', { logType: 'info' });
+    await handleSingleProvider(messages, provider, callbacks);
   } catch (error) {
     logger.error('Stream orchestration error', {
       error: error instanceof Error ? error.message : 'Unknown error',

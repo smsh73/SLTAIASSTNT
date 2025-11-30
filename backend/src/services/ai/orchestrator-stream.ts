@@ -54,6 +54,23 @@ function addSystemPromptToMessages(messages: ChatMessage[], provider: string): C
   return [{ role: 'system', content: systemPrompt }, ...messages];
 }
 
+async function streamTextWithTypingEffect(
+  text: string, 
+  onChunk: (chunk: string) => void,
+  delayMs: number = 3
+): Promise<void> {
+  const words = text.split(' ');
+  
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i] + (i < words.length - 1 ? ' ' : '');
+    onChunk(word);
+    
+    if (i % 3 === 0 && delayMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 export interface StreamCallbacks {
   onChunk: (chunk: string) => void;
   onComplete: (fullResponse: string) => void;
@@ -182,7 +199,7 @@ async function handleSingleProvider(
         });
         
         if (response) {
-          callbacks.onChunk(response);
+          await streamTextWithTypingEffect(response, callbacks.onChunk);
           callbacks.onComplete(response);
         } else {
           logger.error(`No response from ${provider}`, { provider, logType: 'error' });
@@ -239,9 +256,6 @@ async function handleMixOfAgents(
           },
         });
       } else {
-        const loadingText = '*응답 생성 중...*\n';
-        callbacks.onChunk(loadingText);
-        
         let response: string | null = null;
         
         switch (provider) {
@@ -251,25 +265,18 @@ async function handleMixOfAgents(
           case 'gemini':
             response = await chatWithGemini(messagesWithSystem);
             break;
+          case 'perplexity':
+            response = await chatWithPerplexity(messagesWithSystem);
+            break;
         }
         
-        const clearLoading = '\r                    \r';
-        callbacks.onChunk(clearLoading);
-        
         if (response) {
-          const words = response.split(' ');
           let providerResponseText = '';
-          
-          for (let i = 0; i < words.length; i++) {
-            const word = words[i] + (i < words.length - 1 ? ' ' : '');
+          await streamTextWithTypingEffect(response, (word) => {
             providerResponseText += word;
             fullResponse += word;
             callbacks.onChunk(word);
-            
-            if (i % 5 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 10));
-            }
-          }
+          });
           
           const footer = '\n\n---\n\n';
           fullResponse += footer;
@@ -376,7 +383,7 @@ async function handleLuxiaFallback(
   try {
     const response = await chatWithLuxia(messages);
     if (response) {
-      callbacks.onChunk(response);
+      await streamTextWithTypingEffect(response, callbacks.onChunk);
       callbacks.onComplete(response);
     } else {
       callbacks.onError(new Error('Luxia API returned no response'));

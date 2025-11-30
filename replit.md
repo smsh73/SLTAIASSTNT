@@ -81,6 +81,13 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 
 ## Recent Changes
 
+- **2025-11-30**: A2A Mode Sequential Streaming Improvement
+  - Implemented true sequential streaming: each AI completes its full response before the next AI starts
+  - Added streaming functions for all providers: `chatWithClaudeStream`, `chatWithGeminiStream`, `chatWithPerplexityStream`
+  - Fixed Promise timing to ensure fullResponse is accumulated before context propagation
+  - Each subsequent AI now receives complete prior responses as context
+  - Improved `streamProviderResponse` helper with proper await semantics
+
 - **2025-11-30**: AI Model Updates (November 2025 Latest)
   - Updated OpenAI from `gpt-4o` to `gpt-4.1`
   - Updated Claude from `claude-sonnet-4-20250514` to `claude-sonnet-4-5-20250929`

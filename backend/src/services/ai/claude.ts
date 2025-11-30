@@ -105,3 +105,68 @@ export async function chatWithClaude(
   }
 }
 
+export interface StreamCallbacks {
+  onChunk: (chunk: string) => void;
+  onComplete: (fullResponse: string) => void;
+  onError: (error: Error) => void;
+}
+
+export async function chatWithClaudeStream(
+  messages: Array<{ role: string; content: string }>,
+  callbacks: StreamCallbacks,
+  options?: { model?: string; temperature?: number }
+): Promise<void> {
+  try {
+    const claude = await getClaudeClient();
+    if (!claude) {
+      callbacks.onError(new Error('Claude client not available'));
+      return;
+    }
+
+    const systemMessage = messages.find((m) => m.role === 'system')?.content || '';
+    const conversationMessages = messages
+      .filter((m) => m.role !== 'system')
+      .map((m) => ({
+        role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const),
+        content: m.content,
+      }));
+
+    logger.info('Claude stream starting', {
+      model: options?.model || 'claude-sonnet-4-5-20250929',
+      messageCount: conversationMessages.length,
+      logType: 'info',
+    });
+
+    let fullResponse = '';
+
+    const stream = await claude.messages.stream({
+      model: options?.model || 'claude-sonnet-4-5-20250929',
+      max_tokens: 4096,
+      temperature: options?.temperature || 0.7,
+      system: systemMessage || undefined,
+      messages: conversationMessages,
+    });
+
+    for await (const event of stream) {
+      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        const text = event.delta.text;
+        fullResponse += text;
+        callbacks.onChunk(text);
+      }
+    }
+
+    logger.info('Claude stream completed', {
+      responseLength: fullResponse.length,
+      logType: 'success',
+    });
+
+    callbacks.onComplete(fullResponse);
+  } catch (error) {
+    logger.error('Claude stream error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      logType: 'error',
+    });
+    callbacks.onError(error instanceof Error ? error : new Error('Unknown error'));
+  }
+}
+

@@ -2,9 +2,9 @@ import { ChatMessage } from './router.js';
 import { createLogger } from '../../utils/logger.js';
 import { getCircuitBreaker } from './circuitBreaker.js';
 import { chatWithOpenAIStream } from './openai-stream.js';
-import { chatWithClaude } from './claude.js';
-import { chatWithGemini } from './gemini.js';
-import { chatWithPerplexity } from './perplexity.js';
+import { chatWithClaude, chatWithClaudeStream } from './claude.js';
+import { chatWithGemini, chatWithGeminiStream } from './gemini.js';
+import { chatWithPerplexity, chatWithPerplexityStream } from './perplexity.js';
 import { chatWithLuxia, streamLuxia } from './luxia.js';
 import { selectProvider } from './weightManager.js';
 import { analyzeIntent } from './intentAnalyzer.js';
@@ -419,6 +419,55 @@ function formatMixedResponses(responses: { provider: string; response: string }[
   return result;
 }
 
+async function streamProviderResponse(
+  provider: string,
+  messages: ChatMessage[],
+  callbacks: StreamCallbacks
+): Promise<string> {
+  let fullResponse = '';
+  
+  const streamCallbacks = {
+    onChunk: (chunk: string) => {
+      fullResponse += chunk;
+      callbacks.onChunk(chunk);
+    },
+    onComplete: () => {},
+    onError: (error: Error) => {
+      throw error;
+    },
+  };
+
+  const streamCallbacksWithResponse = {
+    onChunk: (chunk: string) => {
+      fullResponse += chunk;
+      callbacks.onChunk(chunk);
+    },
+    onComplete: (_response: string) => {},
+    onError: (error: Error) => {
+      throw error;
+    },
+  };
+
+  switch (provider) {
+    case 'openai':
+      await chatWithOpenAIStream(messages, streamCallbacks);
+      break;
+    case 'claude':
+      await chatWithClaudeStream(messages, streamCallbacksWithResponse);
+      break;
+    case 'gemini':
+      await chatWithGeminiStream(messages, streamCallbacksWithResponse);
+      break;
+    case 'perplexity':
+      await chatWithPerplexityStream(messages, streamCallbacksWithResponse);
+      break;
+    default:
+      throw new Error(`Unknown provider: ${provider}`);
+  }
+
+  return fullResponse;
+}
+
 async function handleA2AMode(
   messages: ChatMessage[],
   userPrompt: string,
@@ -453,38 +502,21 @@ async function handleA2AMode(
           round
         );
 
-        const response = await getProviderResponse(provider, contextMessages);
+        const providerResponse = await streamProviderResponse(provider, contextMessages, callbacks);
         
-        logger.info(`A2A: ${provider} response received`, {
-          hasResponse: !!response,
-          responseLength: response?.length || 0,
-          logType: 'info',
+        logger.info(`A2A: ${provider} streaming completed`, {
+          responseLength: providerResponse.length,
+          logType: 'success',
         });
-        
-        if (response) {
-          const words = response.split(' ');
-          let providerResponse = '';
-          
-          for (let i = 0; i < words.length; i++) {
-            const word = words[i] + (i < words.length - 1 ? ' ' : '');
-            providerResponse += word;
-            fullResponse += word;
-            callbacks.onChunk(word);
-            
-            if (i % 5 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 5));
-            }
-          }
 
+        if (providerResponse) {
+          fullResponse += providerResponse;
           conversationHistory.push({
             provider,
             content: providerResponse,
             phase: 'collaboration',
             round,
           });
-        } else {
-          const noResponse = `API 키가 설정되지 않았거나 응답을 받지 못했습니다.`;
-          callbacks.onChunk(noResponse);
         }
         
         callbacks.onAgentComplete?.(provider);
@@ -519,38 +551,21 @@ async function handleA2AMode(
           round
         );
 
-        const response = await getProviderResponse(provider, contextMessages);
+        const providerResponse = await streamProviderResponse(provider, contextMessages, callbacks);
         
-        logger.info(`A2A: ${provider} debate response received`, {
-          hasResponse: !!response,
-          responseLength: response?.length || 0,
-          logType: 'info',
+        logger.info(`A2A: ${provider} debate streaming completed`, {
+          responseLength: providerResponse.length,
+          logType: 'success',
         });
-        
-        if (response) {
-          const words = response.split(' ');
-          let providerResponse = '';
-          
-          for (let i = 0; i < words.length; i++) {
-            const word = words[i] + (i < words.length - 1 ? ' ' : '');
-            providerResponse += word;
-            fullResponse += word;
-            callbacks.onChunk(word);
-            
-            if (i % 5 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 5));
-            }
-          }
 
+        if (providerResponse) {
+          fullResponse += providerResponse;
           conversationHistory.push({
             provider,
             content: providerResponse,
             phase: 'debate',
             round,
           });
-        } else {
-          const noResponse = `API 키가 설정되지 않았거나 응답을 받지 못했습니다.`;
-          callbacks.onChunk(noResponse);
         }
         
         callbacks.onAgentComplete?.(provider);
@@ -571,28 +586,50 @@ async function handleA2AMode(
 
   try {
     const synthesisMessages = buildSynthesisMessages(userPrompt, conversationHistory);
-    const synthesisResponse = await chatWithLuxia(synthesisMessages);
     
-    if (synthesisResponse) {
-      const words = synthesisResponse.split(' ');
-      
-      for (let i = 0; i < words.length; i++) {
-        const word = words[i] + (i < words.length - 1 ? ' ' : '');
-        fullResponse += word;
-        callbacks.onChunk(word);
-        
-        if (i % 5 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 5));
-        }
+    let synthesisResponse = '';
+    try {
+      const stream = await streamLuxia(synthesisMessages);
+      if (stream) {
+        let buffer = '';
+        await new Promise<void>((resolve, reject) => {
+          stream.on('data', (chunk: Buffer) => {
+            buffer += chunk.toString();
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices?.[0]?.delta?.content || '';
+                  if (content) {
+                    synthesisResponse += content;
+                    fullResponse += content;
+                    callbacks.onChunk(content);
+                  }
+                } catch {}
+              }
+            }
+          });
+          stream.on('end', () => resolve());
+          stream.on('error', (error: Error) => reject(error));
+        });
       }
-    } else {
-      callbacks.onChunk('Luxia 응답 실패, Claude로 대체 종합 중...\n\n');
+    } catch (luxiaError) {
+      logger.warning('Luxia streaming failed, trying non-stream', {
+        error: luxiaError instanceof Error ? luxiaError.message : 'Unknown',
+        logType: 'warning',
+      });
       
-      const fallbackResponse = await chatWithClaude(synthesisMessages);
-      if (fallbackResponse) {
-        const words = fallbackResponse.split(' ');
+      const luxiaResponse = await chatWithLuxia(synthesisMessages);
+      if (luxiaResponse) {
+        const words = luxiaResponse.split(' ');
         for (let i = 0; i < words.length; i++) {
           const word = words[i] + (i < words.length - 1 ? ' ' : '');
+          synthesisResponse += word;
           fullResponse += word;
           callbacks.onChunk(word);
           if (i % 5 === 0) {
@@ -600,6 +637,22 @@ async function handleA2AMode(
           }
         }
       }
+    }
+    
+    if (!synthesisResponse) {
+      callbacks.onChunk('Luxia 응답 실패, Claude로 대체 종합 중...\n\n');
+      
+      await new Promise<void>((resolve, reject) => {
+        chatWithClaudeStream(synthesisMessages, {
+          onChunk: (chunk: string) => {
+            synthesisResponse += chunk;
+            fullResponse += chunk;
+            callbacks.onChunk(chunk);
+          },
+          onComplete: () => resolve(),
+          onError: (error: Error) => reject(error),
+        });
+      });
     }
   } catch (error) {
     logger.error('A2A synthesis failed', {

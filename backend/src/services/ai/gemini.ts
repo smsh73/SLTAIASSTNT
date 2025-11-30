@@ -107,3 +107,72 @@ export async function chatWithGemini(
   }
 }
 
+export interface StreamCallbacks {
+  onChunk: (chunk: string) => void;
+  onComplete: (fullResponse: string) => void;
+  onError: (error: Error) => void;
+}
+
+export async function chatWithGeminiStream(
+  messages: Array<{ role: string; content: string }>,
+  callbacks: StreamCallbacks,
+  options?: { model?: string; temperature?: number }
+): Promise<void> {
+  try {
+    const gemini = await getGeminiClient();
+    if (!gemini) {
+      callbacks.onError(new Error('Gemini client not available'));
+      return;
+    }
+
+    const modelName = options?.model || 'gemini-2.5-flash';
+    logger.info('Gemini stream starting', {
+      model: modelName,
+      messageCount: messages.length,
+      logType: 'info',
+    });
+
+    const model = gemini.getGenerativeModel({
+      model: modelName,
+    });
+
+    const prompt = messages
+      .map((m) => {
+        const role = m.role === 'user' ? 'User' : m.role === 'assistant' ? 'Assistant' : 'System';
+        return `${role}: ${m.content}`;
+      })
+      .join('\n\n') + '\n\nAssistant:';
+
+    let fullResponse = '';
+
+    const result = await model.generateContentStream({
+      contents: [{ role: 'user' as const, parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: options?.temperature || 0.7,
+      },
+    });
+
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      if (text) {
+        fullResponse += text;
+        callbacks.onChunk(text);
+      }
+    }
+
+    logger.info('Gemini stream completed', {
+      responseLength: fullResponse.length,
+      logType: 'success',
+    });
+
+    callbacks.onComplete(fullResponse);
+  } catch (error: any) {
+    logger.error('Gemini stream error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      errorDetails: error?.message,
+      logType: 'error',
+    });
+    callbacks.onError(error instanceof Error ? error : new Error('Unknown error'));
+  }
+}
+

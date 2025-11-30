@@ -81,6 +81,14 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 
 ## Recent Changes
 
+- **2025-11-30**: Luxia AI 종합 Summary 및 UI 개선
+  - Luxia 최종 답변에 구조화된 종합 Summary 섹션 추가
+  - 각 AI별 핵심 인사이트를 불릿 포인트 + 해설 형태로 요약
+  - AI별 섹션 구분 (🤖 OpenAI, 🧠 Claude, ✨ Gemini, 🔍 Perplexity)
+  - 최종 종합 답변 + 💡 핵심 결론 섹션 추가
+  - AI 메시지창 두꺼운 테두리 제거 → 얇고 프로페셔널한 디자인으로 변경
+  - Luxia AI 메시지에 특별 스타일 적용 (그라데이션 배경, "최종 종합" 라벨, 확장된 타이포그래피)
+
 - **2025-11-30**: A2A Mode Sequential Streaming Improvement
   - Implemented true sequential streaming: each AI completes its full response before the next AI starts
   - Added streaming functions for all providers: `chatWithClaudeStream`, `chatWithGeminiStream`, `chatWithPerplexityStream`

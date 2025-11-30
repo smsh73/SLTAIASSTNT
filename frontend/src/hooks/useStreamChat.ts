@@ -29,14 +29,16 @@ export function useStreamChat() {
       setStreamError(null);
 
       try {
+        const resolvedChatMode = chatMode || 'normal';
         const requestBody = {
           message,
           conversationId: conversationId || null,
           provider: provider || null,
-          chatMode: chatMode || 'normal',
+          chatMode: resolvedChatMode,
+          mixOfAgents: resolvedChatMode === 'mix',
         };
         
-        console.log('=== useStreamChat: Sending request ===', requestBody);
+        console.log('=== useStreamChat v3: Sending request ===', requestBody);
         
         const response = await fetch(
           '/api/ai/chat/stream',

@@ -79,7 +79,7 @@ export async function chatWithClaude(
       logType: 'info',
     });
 
-    const response = await (claude as any).messages.create({
+    const response = await claude.messages.create({
       model: options?.model || 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       temperature: options?.temperature || 0.7,

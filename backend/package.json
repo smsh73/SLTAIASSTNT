@@ -20,7 +20,7 @@
     "db:optimize": "bash ../database/scripts/optimize-db.sh"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.9.1",
+    "@anthropic-ai/sdk": "^0.71.0",
     "@aws-sdk/client-s3": "^3.490.0",
     "@aws-sdk/s3-request-presigner": "^3.940.0",
     "@google/generative-ai": "^0.2.1",

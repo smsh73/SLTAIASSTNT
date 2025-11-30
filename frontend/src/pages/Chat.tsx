@@ -10,6 +10,12 @@ import { useAuthStore } from '../store/authStore';
 import { Message } from '../types/message';
 import { useStreamChat } from '../hooks/useStreamChat';
 
+let messageIdCounter = 0;
+function generateUniqueId(): number {
+  messageIdCounter += 1;
+  return Date.now() * 1000 + messageIdCounter;
+}
+
 interface AgentMessage {
   provider: string;
   providerName: string;
@@ -182,7 +188,7 @@ export default function Chat() {
     }
 
     const userMessage: Message = {
-      id: Date.now(),
+      id: generateUniqueId(),
       role: 'user',
       content: message,
       createdAt: new Date().toISOString(),
@@ -241,7 +247,7 @@ export default function Chat() {
           setCurrentAgentId(null);
         },
         (provider: string, providerName: string, phase?: string, round?: number) => {
-          const newAgentId = Date.now();
+          const newAgentId = generateUniqueId();
           currentAgentIdRef.current = newAgentId;
           setCurrentAgentId(newAgentId);
           
@@ -273,7 +279,7 @@ export default function Chat() {
           setCurrentPhase(phase);
           
           const phaseMessage: Message = {
-            id: Date.now(),
+            id: generateUniqueId(),
             role: 'system',
             content: phase === 'collaboration' 
               ? '### 1단계: 협력적 인사이트 공유' 
@@ -289,7 +295,7 @@ export default function Chat() {
         }
       );
     } else {
-      const assistantMessageId = Date.now() + 1;
+      const assistantMessageId = generateUniqueId();
       const assistantMessage: Message = {
         id: assistantMessageId,
         role: 'assistant',

@@ -3,19 +3,27 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
-// Service Worker 등록
+// Service Worker 제거 및 캐시 클리어 (v2 - 2024-11-30)
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((registration) => {
-        console.log('Service Worker registered:', registration);
-      })
-      .catch((error) => {
-        console.error('Service Worker registration failed:', error);
-      });
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+      console.log('Service Worker unregistered');
+    }
   });
+  
+  // 캐시 스토리지 클리어
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      names.forEach((name) => {
+        caches.delete(name);
+        console.log('Cache deleted:', name);
+      });
+    });
+  }
 }
+
+console.log('=== Frontend Version: 2024-11-30-v2 ===');
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <BrowserRouter>

@@ -400,10 +400,10 @@ async function getOpenAINonStream(messages: ChatMessage[]): Promise<string | nul
 
 function getProviderName(provider: string): string {
   const names: Record<string, string> = {
-    openai: 'OpenAI GPT-4o',
-    claude: 'Claude Sonnet 4',
-    gemini: 'Google Gemini 1.5',
-    perplexity: 'Perplexity AI',
+    openai: 'OpenAI GPT-4.1',
+    claude: 'Claude Sonnet 4.5',
+    gemini: 'Google Gemini 2.5',
+    perplexity: 'Perplexity Sonar Pro',
     luxia: 'Luxia AI',
   };
   return names[provider] || provider;

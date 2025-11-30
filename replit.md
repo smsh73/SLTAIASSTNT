@@ -32,7 +32,7 @@ A fullstack AI assistant application with a React + Vite frontend and Node.js + 
 - **Frontend**: React 18, Vite 5, TypeScript, TailwindCSS, Zustand
 - **Backend**: Node.js, Express, TypeScript, Prisma ORM
 - **Database**: PostgreSQL (Neon)
-- **AI Services**: OpenAI, Claude, Gemini, Perplexity, Luxia (configurable)
+- **AI Services**: OpenAI GPT-4.1, Claude Sonnet 4.5, Gemini 2.5, Perplexity Sonar Pro, Luxia (configurable)
 
 ## Development
 
@@ -80,6 +80,14 @@ The A2A (Agent-to-Agent) mode enables collaborative conversation among multiple 
 3. **Phase 3: Synthesis** - Luxia AI synthesizes all contributions into a comprehensive final answer
 
 ## Recent Changes
+
+- **2025-11-30**: AI Model Updates (November 2025 Latest)
+  - Updated OpenAI from `gpt-4o` to `gpt-4.1`
+  - Updated Claude from `claude-sonnet-4-20250514` to `claude-sonnet-4-5-20250929`
+  - Updated Gemini from `gemini-2.0-flash` to `gemini-2.5-flash`
+  - Perplexity remains `sonar-pro` (unchanged)
+  - Upgraded Anthropic SDK from 0.9.1 to 0.71.0
+  - Fixed message ID collision causing duplicate key errors in A2A mode
 
 - **2025-11-29**: Luxia AI Prompt Suggestions
   - Replaced static template-based suggestions with dynamic Luxia AI suggestions

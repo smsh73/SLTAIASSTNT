@@ -25,7 +25,7 @@ export async function chatWithOpenAIStream(
     }
 
     const stream = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1',
       messages: messages.map((msg) => ({
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,

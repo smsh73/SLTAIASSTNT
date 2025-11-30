@@ -74,13 +74,13 @@ export async function chatWithClaude(
       }));
 
     logger.info('Claude chat starting', {
-      model: options?.model || 'claude-sonnet-4-20250514',
+      model: options?.model || 'claude-sonnet-4-5-20250929',
       messageCount: conversationMessages.length,
       logType: 'info',
     });
 
     const response = await claude.messages.create({
-      model: options?.model || 'claude-sonnet-4-20250514',
+      model: options?.model || 'claude-sonnet-4-5-20250929',
       max_tokens: 4096,
       temperature: options?.temperature || 0.7,
       system: systemMessage || undefined,

@@ -110,9 +110,11 @@ router.post(
 
       // SSE 헤더 설정
       res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no');
+      res.setHeader('Transfer-Encoding', 'chunked');
+      res.flushHeaders();
 
       // 새 대화인 경우 conversationId를 클라이언트에 전송
       if (isNewConversation) {

@@ -443,9 +443,12 @@ async function handleA2AMode(
           logType: 'info',
         });
 
-        const providerHeader = `**${getProviderName(provider)}**:\n`;
+        const providerHeader = `**${getProviderName(provider)}**: `;
         fullResponse += providerHeader;
         callbacks.onChunk(providerHeader);
+        
+        const loadingMsg = `*응답 생성 중...*`;
+        callbacks.onChunk(loadingMsg);
 
         const contextMessages = buildA2AContextMessages(
           userPrompt,
@@ -456,6 +459,9 @@ async function handleA2AMode(
         );
 
         const response = await getProviderResponse(provider, contextMessages);
+        
+        const clearLoading = `\r${' '.repeat(loadingMsg.length)}\r`;
+        callbacks.onChunk(clearLoading);
         
         logger.info(`A2A: ${provider} response received`, {
           hasResponse: !!response,
@@ -520,9 +526,12 @@ async function handleA2AMode(
           logType: 'info',
         });
 
-        const providerHeader = `**${getProviderName(provider)}**:\n`;
+        const providerHeader = `**${getProviderName(provider)}**: `;
         fullResponse += providerHeader;
         callbacks.onChunk(providerHeader);
+        
+        const loadingMsg = `*응답 생성 중...*`;
+        callbacks.onChunk(loadingMsg);
 
         const contextMessages = buildA2AContextMessages(
           userPrompt,
@@ -533,6 +542,9 @@ async function handleA2AMode(
         );
 
         const response = await getProviderResponse(provider, contextMessages);
+        
+        const clearLoading = `\r${' '.repeat(loadingMsg.length)}\r`;
+        callbacks.onChunk(clearLoading);
         
         logger.info(`A2A: ${provider} debate response received`, {
           hasResponse: !!response,

@@ -60,16 +60,24 @@ export async function chatWithClaude(
 ): Promise<string | null> {
   try {
     const claude = await getClaudeClient();
-    if (!claude) return null;
+    if (!claude) {
+      logger.warning('Claude client not available', { logType: 'warning' });
+      return null;
+    }
 
-    // Claude는 시스템 메시지를 별도로 처리
     const systemMessage = messages.find((m) => m.role === 'system')?.content || '';
     const conversationMessages = messages
       .filter((m) => m.role !== 'system')
       .map((m) => ({
-        role: m.role === 'assistant' ? 'assistant' : 'user',
+        role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const),
         content: m.content,
-      })) as any;
+      }));
+
+    logger.info('Claude chat starting', {
+      model: options?.model || 'claude-sonnet-4-20250514',
+      messageCount: conversationMessages.length,
+      logType: 'info',
+    });
 
     const response = await (claude as any).messages.create({
       model: options?.model || 'claude-sonnet-4-20250514',
@@ -79,7 +87,15 @@ export async function chatWithClaude(
       messages: conversationMessages,
     });
 
-    return response.content[0]?.type === 'text' ? response.content[0].text : null;
+    const text = response.content[0]?.type === 'text' ? response.content[0].text : null;
+    
+    logger.info('Claude chat response received', {
+      hasContent: !!text,
+      contentLength: text?.length || 0,
+      logType: 'success',
+    });
+
+    return text;
   } catch (error) {
     logger.error('Claude chat error', {
       error: error instanceof Error ? error.message : 'Unknown error',

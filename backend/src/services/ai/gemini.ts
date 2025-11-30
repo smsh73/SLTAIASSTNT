@@ -62,7 +62,7 @@ export async function chatWithGemini(
       return null;
     }
 
-    const modelName = options?.model || 'gemini-1.5-flash-latest';
+    const modelName = options?.model || 'gemini-1.5-flash';
     logger.info('Gemini chat starting', {
       model: modelName,
       messageCount: messages.length,

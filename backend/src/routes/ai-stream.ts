@@ -54,8 +54,11 @@ router.post(
     try {
       const { message, conversationId: existingConversationId, provider, chatMode: rawChatMode, mixOfAgents } = req.body;
       
-      // chatMode 결정: chatMode 필드 우선, mixOfAgents는 레거시 지원
-      let chatMode = rawChatMode;
+      // X-Chat-Mode 헤더에서 chatMode 가져오기 (캐시 우회용)
+      const headerChatMode = req.headers['x-chat-mode'] as string | undefined;
+      
+      // chatMode 결정: 헤더 우선 > body의 chatMode > mixOfAgents 레거시 지원
+      let chatMode = headerChatMode || rawChatMode;
       if (!chatMode && mixOfAgents === true) {
         chatMode = 'mix';
       }
@@ -68,6 +71,7 @@ router.post(
         message: message?.substring(0, 50),
         provider,
         rawChatMode,
+        headerChatMode,
         mixOfAgents,
         resolvedChatMode: chatMode,
         logType: 'info',

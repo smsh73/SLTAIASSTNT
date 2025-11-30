@@ -38,7 +38,7 @@ export function useStreamChat() {
           mixOfAgents: resolvedChatMode === 'mix',
         };
         
-        console.log('=== useStreamChat v3: Sending request ===', requestBody);
+        console.log('=== useStreamChat v4: Sending request ===', requestBody);
         
         const response = await fetch(
           '/api/ai/chat/stream',
@@ -47,6 +47,7 @@ export function useStreamChat() {
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
+              'X-Chat-Mode': resolvedChatMode,
             },
             body: JSON.stringify(requestBody),
           }

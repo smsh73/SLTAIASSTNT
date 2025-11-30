@@ -4,10 +4,22 @@ import { useAuthStore } from '../store/authStore';
 type ChatMode = 'normal' | 'mix' | 'a2a';
 
 interface StreamMessage {
-  type: 'chunk' | 'complete' | 'error' | 'conversationId';
+  type: 'chunk' | 'complete' | 'error' | 'conversationId' | 'agent_start' | 'agent_complete' | 'phase';
   content?: string;
   message?: string;
   conversationId?: number;
+  provider?: string;
+  providerName?: string;
+  phase?: string;
+  round?: number;
+}
+
+interface AgentMessage {
+  provider: string;
+  providerName: string;
+  content: string;
+  phase?: string;
+  round?: number;
 }
 
 export function useStreamChat() {
@@ -23,7 +35,10 @@ export function useStreamChat() {
       chatMode?: ChatMode,
       onChunk?: (chunk: string) => void,
       onComplete?: (fullResponse: string, newConversationId?: number) => void,
-      onError?: (error: string) => void
+      onError?: (error: string) => void,
+      onAgentStart?: (provider: string, providerName: string, phase?: string, round?: number) => void,
+      onAgentComplete?: (agentMessage: AgentMessage) => void,
+      onPhaseChange?: (phase: string) => void
     ) => {
       setIsStreaming(true);
       setStreamError(null);
@@ -38,7 +53,7 @@ export function useStreamChat() {
           mixOfAgents: resolvedChatMode === 'mix',
         };
         
-        console.log('=== useStreamChat v4: Sending request ===', requestBody);
+        console.log('=== useStreamChat v6: Sending request ===', requestBody);
         
         const response = await fetch(
           '/api/ai/chat/stream',
@@ -66,6 +81,11 @@ export function useStreamChat() {
 
         let buffer = '';
         let fullResponse = '';
+        let currentAgentContent = '';
+        let currentProvider = '';
+        let currentProviderName = '';
+        let currentPhase = '';
+        let currentRound = 0;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -87,9 +107,29 @@ export function useStreamChat() {
 
                 if (data.type === 'conversationId' && data.conversationId) {
                   newConversationId = data.conversationId;
+                } else if (data.type === 'phase' && data.phase) {
+                  currentPhase = data.phase;
+                  onPhaseChange?.(data.phase);
+                } else if (data.type === 'agent_start') {
+                  currentProvider = data.provider || '';
+                  currentProviderName = data.providerName || '';
+                  currentAgentContent = '';
+                  currentRound = data.round || 0;
+                  onAgentStart?.(currentProvider, currentProviderName, data.phase, data.round);
                 } else if (data.type === 'chunk' && data.content) {
                   fullResponse += data.content;
+                  currentAgentContent += data.content;
                   onChunk?.(data.content);
+                } else if (data.type === 'agent_complete') {
+                  const agentMessage: AgentMessage = {
+                    provider: currentProvider,
+                    providerName: currentProviderName,
+                    content: currentAgentContent,
+                    phase: currentPhase,
+                    round: currentRound,
+                  };
+                  onAgentComplete?.(agentMessage);
+                  currentAgentContent = '';
                 } else if (data.type === 'complete' && data.content) {
                   fullResponse = data.content;
                   onComplete?.(fullResponse, newConversationId || data.conversationId);

@@ -58,6 +58,9 @@ export interface StreamCallbacks {
   onChunk: (chunk: string) => void;
   onComplete: (fullResponse: string) => void;
   onError: (error: Error) => void;
+  onAgentStart?: (provider: string, providerName: string, phase: string, round: number) => void;
+  onAgentComplete?: (provider: string) => void;
+  onPhaseChange?: (phase: string) => void;
 }
 
 export type ChatMode = 'normal' | 'mix' | 'a2a';
@@ -424,31 +427,16 @@ async function handleA2AMode(
     logType: 'info',
   });
 
-  const header = `## A2A 협력 토론 모드\n\n여러 AI 에이전트가 협력하여 최적의 답변을 도출합니다.\n\n**주제**: ${userPrompt}\n\n---\n\n`;
-  fullResponse += header;
-  callbacks.onChunk(header);
-
-  const phase1Header = `### 1단계: 협력적 인사이트 공유 (2라운드)\n\n`;
-  fullResponse += phase1Header;
-  callbacks.onChunk(phase1Header);
+  callbacks.onPhaseChange?.('collaboration');
 
   for (let round = 1; round <= 2; round++) {
-    const roundHeader = `#### 라운드 ${round}\n\n`;
-    fullResponse += roundHeader;
-    callbacks.onChunk(roundHeader);
-
     for (const provider of providers) {
       try {
         logger.info(`A2A: Calling ${provider} for collaboration round ${round}`, {
           logType: 'info',
         });
 
-        const providerHeader = `**${getProviderName(provider)}**: `;
-        fullResponse += providerHeader;
-        callbacks.onChunk(providerHeader);
-        
-        const loadingMsg = `*응답 생성 중...*`;
-        callbacks.onChunk(loadingMsg);
+        callbacks.onAgentStart?.(provider, getProviderName(provider), 'collaboration', round);
 
         const contextMessages = buildA2AContextMessages(
           userPrompt,
@@ -459,9 +447,6 @@ async function handleA2AMode(
         );
 
         const response = await getProviderResponse(provider, contextMessages);
-        
-        const clearLoading = `\r${' '.repeat(loadingMsg.length)}\r`;
-        callbacks.onChunk(clearLoading);
         
         logger.info(`A2A: ${provider} response received`, {
           hasResponse: !!response,
@@ -479,8 +464,8 @@ async function handleA2AMode(
             fullResponse += word;
             callbacks.onChunk(word);
             
-            if (i % 8 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 10));
+            if (i % 5 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 5));
             }
           }
 
@@ -490,48 +475,34 @@ async function handleA2AMode(
             phase: 'collaboration',
             round,
           });
-
-          const footer = '\n\n';
-          fullResponse += footer;
-          callbacks.onChunk(footer);
         } else {
-          const noResponse = `*${getProviderName(provider)} API 키가 설정되지 않았거나 응답을 받지 못했습니다.*\n\n`;
-          fullResponse += noResponse;
+          const noResponse = `API 키가 설정되지 않았거나 응답을 받지 못했습니다.`;
           callbacks.onChunk(noResponse);
         }
+        
+        callbacks.onAgentComplete?.(provider);
       } catch (error) {
         logger.warning(`A2A: ${provider} failed in collaboration round ${round}`, {
           error: error instanceof Error ? error.message : 'Unknown',
           logType: 'warning',
         });
-        const errorText = `*${getProviderName(provider)} 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}*\n\n`;
-        fullResponse += errorText;
+        const errorText = `오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`;
         callbacks.onChunk(errorText);
+        callbacks.onAgentComplete?.(provider);
       }
     }
   }
 
-  const phase2Header = `---\n\n### 2단계: 토론 및 보완 (2라운드)\n\n`;
-  fullResponse += phase2Header;
-  callbacks.onChunk(phase2Header);
+  callbacks.onPhaseChange?.('debate');
 
   for (let round = 1; round <= 2; round++) {
-    const roundHeader = `#### 토론 라운드 ${round}\n\n`;
-    fullResponse += roundHeader;
-    callbacks.onChunk(roundHeader);
-
     for (const provider of providers) {
       try {
         logger.info(`A2A: Calling ${provider} for debate round ${round}`, {
           logType: 'info',
         });
 
-        const providerHeader = `**${getProviderName(provider)}**: `;
-        fullResponse += providerHeader;
-        callbacks.onChunk(providerHeader);
-        
-        const loadingMsg = `*응답 생성 중...*`;
-        callbacks.onChunk(loadingMsg);
+        callbacks.onAgentStart?.(provider, getProviderName(provider), 'debate', round);
 
         const contextMessages = buildA2AContextMessages(
           userPrompt,
@@ -542,9 +513,6 @@ async function handleA2AMode(
         );
 
         const response = await getProviderResponse(provider, contextMessages);
-        
-        const clearLoading = `\r${' '.repeat(loadingMsg.length)}\r`;
-        callbacks.onChunk(clearLoading);
         
         logger.info(`A2A: ${provider} debate response received`, {
           hasResponse: !!response,
@@ -562,8 +530,8 @@ async function handleA2AMode(
             fullResponse += word;
             callbacks.onChunk(word);
             
-            if (i % 8 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 10));
+            if (i % 5 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 5));
             }
           }
 
@@ -573,30 +541,26 @@ async function handleA2AMode(
             phase: 'debate',
             round,
           });
-
-          const footer = '\n\n';
-          fullResponse += footer;
-          callbacks.onChunk(footer);
         } else {
-          const noResponse = `*${getProviderName(provider)} API 키가 설정되지 않았거나 응답을 받지 못했습니다.*\n\n`;
-          fullResponse += noResponse;
+          const noResponse = `API 키가 설정되지 않았거나 응답을 받지 못했습니다.`;
           callbacks.onChunk(noResponse);
         }
+        
+        callbacks.onAgentComplete?.(provider);
       } catch (error) {
         logger.warning(`A2A: ${provider} failed in debate round ${round}`, {
           error: error instanceof Error ? error.message : 'Unknown',
           logType: 'warning',
         });
-        const errorText = `*${getProviderName(provider)} 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}*\n\n`;
-        fullResponse += errorText;
+        const errorText = `오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`;
         callbacks.onChunk(errorText);
+        callbacks.onAgentComplete?.(provider);
       }
     }
   }
 
-  const synthesisHeader = `---\n\n### 3단계: Luxia AI 최종 종합\n\n`;
-  fullResponse += synthesisHeader;
-  callbacks.onChunk(synthesisHeader);
+  callbacks.onPhaseChange?.('synthesis');
+  callbacks.onAgentStart?.('luxia', 'Luxia AI', 'synthesis', 1);
 
   try {
     const synthesisMessages = buildSynthesisMessages(userPrompt, conversationHistory);
@@ -610,14 +574,12 @@ async function handleA2AMode(
         fullResponse += word;
         callbacks.onChunk(word);
         
-        if (i % 8 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 10));
+        if (i % 5 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 5));
         }
       }
     } else {
-      const fallbackHeader = '*Luxia 응답 실패, Claude로 대체 종합 중...*\n\n';
-      fullResponse += fallbackHeader;
-      callbacks.onChunk(fallbackHeader);
+      callbacks.onChunk('Luxia 응답 실패, Claude로 대체 종합 중...\n\n');
       
       const fallbackResponse = await chatWithClaude(synthesisMessages);
       if (fallbackResponse) {
@@ -626,8 +588,8 @@ async function handleA2AMode(
           const word = words[i] + (i < words.length - 1 ? ' ' : '');
           fullResponse += word;
           callbacks.onChunk(word);
-          if (i % 8 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 10));
+          if (i % 5 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 5));
           }
         }
       }
@@ -637,15 +599,11 @@ async function handleA2AMode(
       error: error instanceof Error ? error.message : 'Unknown',
       logType: 'error',
     });
-    const errorText = '\n\n*최종 종합 중 오류가 발생했습니다.*';
-    fullResponse += errorText;
+    const errorText = '최종 종합 중 오류가 발생했습니다.';
     callbacks.onChunk(errorText);
   }
-
-  const endFooter = '\n\n---\n\n*A2A 협력 토론이 완료되었습니다.*';
-  fullResponse += endFooter;
-  callbacks.onChunk(endFooter);
-
+  
+  callbacks.onAgentComplete?.('luxia');
   callbacks.onComplete(fullResponse);
 }
 

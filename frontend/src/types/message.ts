@@ -3,5 +3,7 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   createdAt: string;
+  provider?: string;
+  providerName?: string;
+  phase?: string;
 }
-

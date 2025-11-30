@@ -143,7 +143,6 @@ router.post(
             res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
           },
           onComplete: async (fullResponse: string) => {
-            // AI 응답 저장
             try {
               await addMessage(activeConversationId, req.userId!, 'assistant', fullResponse, provider || 'auto');
               logger.info('Conversation saved', {
@@ -168,6 +167,15 @@ router.post(
             });
             res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
             res.end();
+          },
+          onAgentStart: (providerKey: string, providerName: string, phase: string, round: number) => {
+            res.write(`data: ${JSON.stringify({ type: 'agent_start', provider: providerKey, providerName, phase, round })}\n\n`);
+          },
+          onAgentComplete: (providerKey: string) => {
+            res.write(`data: ${JSON.stringify({ type: 'agent_complete', provider: providerKey })}\n\n`);
+          },
+          onPhaseChange: (phase: string) => {
+            res.write(`data: ${JSON.stringify({ type: 'phase', phase })}\n\n`);
           },
         },
         {

@@ -10,6 +10,14 @@ import { useAuthStore } from '../store/authStore';
 import { Message } from '../types/message';
 import { useStreamChat } from '../hooks/useStreamChat';
 
+interface AgentMessage {
+  provider: string;
+  providerName: string;
+  content: string;
+  phase?: string;
+  round?: number;
+}
+
 interface AIProvider {
   id: string;
   name: string;
@@ -34,7 +42,10 @@ export default function Chat() {
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [_streamingMessage, setStreamingMessage] = useState<string>('');
+  const [_currentAgentId, setCurrentAgentId] = useState<number | null>(null);
+  const [_currentPhase, setCurrentPhase] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const currentAgentIdRef = useRef<number | null>(null);
   const { token } = useAuthStore();
   const { streamChat } = useStreamChat();
 
@@ -182,63 +193,153 @@ export default function Chat() {
     setCurrentInput('');
     setStreamingMessage('');
     setUploadedFiles([]);
-
-    const assistantMessageId = Date.now() + 1;
-    const assistantMessage: Message = {
-      id: assistantMessageId,
-      role: 'assistant',
-      content: '',
-      createdAt: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, assistantMessage]);
+    setCurrentAgentId(null);
+    setCurrentPhase('');
+    currentAgentIdRef.current = null;
 
     console.log('=== Sending message ===', {
       chatMode,
       selectedProvider,
       conversationId,
     });
-    
-    await streamChat(
-      fullMessage,
-      conversationId || null,
-      selectedProvider !== 'auto' ? selectedProvider : undefined,
-      chatMode,
-      (chunk: string) => {
-        setStreamingMessage((prev) => {
-          const newContent = prev + chunk;
+
+    if (chatMode === 'a2a') {
+      await streamChat(
+        fullMessage,
+        conversationId || null,
+        selectedProvider !== 'auto' ? selectedProvider : undefined,
+        chatMode,
+        (chunk: string) => {
+          const agentId = currentAgentIdRef.current;
+          if (agentId) {
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === agentId
+                  ? { ...msg, content: msg.content + chunk }
+                  : msg
+              )
+            );
+          }
+        },
+        (_fullResponse, newConversationId) => {
+          setStreamingMessage('');
+          setLoading(false);
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+          setCurrentPhase('');
+          
+          if (newConversationId && !conversationId) {
+            navigate(`/chat/${newConversationId}`, { replace: true });
+            refreshConversationList();
+          }
+        },
+        (error: string) => {
+          console.error('Stream error:', error);
+          setStreamingMessage('');
+          setLoading(false);
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+        },
+        (provider: string, providerName: string, phase?: string, round?: number) => {
+          const newAgentId = Date.now();
+          currentAgentIdRef.current = newAgentId;
+          setCurrentAgentId(newAgentId);
+          
+          const phaseLabel = phase === 'collaboration' 
+            ? `협력 라운드 ${round}` 
+            : phase === 'debate' 
+              ? `토론 라운드 ${round}` 
+              : phase === 'synthesis' 
+                ? '최종 종합' 
+                : '';
+          
+          const newAgentMessage: Message = {
+            id: newAgentId,
+            role: 'assistant',
+            content: '',
+            createdAt: new Date().toISOString(),
+            provider: provider,
+            providerName: providerName,
+            phase: phaseLabel,
+          };
+          
+          setMessages((prev) => [...prev, newAgentMessage]);
+        },
+        (_agentMessage: AgentMessage) => {
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+        },
+        (phase: string) => {
+          setCurrentPhase(phase);
+          
+          const phaseMessage: Message = {
+            id: Date.now(),
+            role: 'system',
+            content: phase === 'collaboration' 
+              ? '### 1단계: 협력적 인사이트 공유' 
+              : phase === 'debate' 
+                ? '### 2단계: 토론 및 보완' 
+                : phase === 'synthesis' 
+                  ? '### 3단계: 최종 종합' 
+                  : phase,
+            createdAt: new Date().toISOString(),
+          };
+          
+          setMessages((prev) => [...prev, phaseMessage]);
+        }
+      );
+    } else {
+      const assistantMessageId = Date.now() + 1;
+      const assistantMessage: Message = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        createdAt: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      
+      await streamChat(
+        fullMessage,
+        conversationId || null,
+        selectedProvider !== 'auto' ? selectedProvider : undefined,
+        chatMode,
+        (chunk: string) => {
+          setStreamingMessage((prev) => {
+            const newContent = prev + chunk;
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === assistantMessageId
+                  ? { ...msg, content: newContent }
+                  : msg
+              )
+            );
+            return newContent;
+          });
+        },
+        (fullResponse: string, newConversationId?: number) => {
+          setStreamingMessage('');
           setMessages((prevMessages) =>
             prevMessages.map((msg) =>
               msg.id === assistantMessageId
-                ? { ...msg, content: newContent }
+                ? { ...msg, content: fullResponse }
                 : msg
             )
           );
-          return newContent;
-        });
-      },
-      (fullResponse: string, newConversationId?: number) => {
-        setStreamingMessage('');
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.id === assistantMessageId
-              ? { ...msg, content: fullResponse }
-              : msg
-          )
-        );
-        setLoading(false);
-        
-        if (newConversationId && !conversationId) {
-          navigate(`/chat/${newConversationId}`, { replace: true });
-          refreshConversationList();
+          setLoading(false);
+          
+          if (newConversationId && !conversationId) {
+            navigate(`/chat/${newConversationId}`, { replace: true });
+            refreshConversationList();
+          }
+        },
+        (error: string) => {
+          console.error('Stream error:', error);
+          setStreamingMessage('');
+          setLoading(false);
         }
-      },
-      (error: string) => {
-        console.error('Stream error:', error);
-        setStreamingMessage('');
-        setLoading(false);
-      }
-    );
+      );
+    }
   };
 
   return (

@@ -86,6 +86,7 @@ async function streamProviderResponse(
   ];
 
   let fullResponse = '';
+  let hasError = false;
   
   const io = getIO();
   const callbacks: StreamCallbacks = {
@@ -102,11 +103,22 @@ async function streamProviderResponse(
     },
     onComplete: () => {},
     onError: (error: Error) => {
+      hasError = true;
       logger.error(`A2A WebSocket: ${provider} error`, {
         screenName: 'AI',
         callerFunction: 'streamProviderResponse',
         error: error.message,
         logType: 'error',
+      });
+      const errorMessage = `[${providerName}: 응답 생성 실패 - ${error.message}]`;
+      fullResponse = errorMessage;
+      io.to(`a2a_${sessionId}`).emit('a2a_chunk', {
+        provider,
+        providerName,
+        phase,
+        round,
+        chunk: errorMessage,
+        timestamp: Date.now(),
       });
     },
   };

@@ -126,14 +126,18 @@ export async function chatWithPerplexityStream(
       return;
     }
 
+    const filteredMessages = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant' || m.role === 'system')
+      .map((m) => ({
+        role: m.role === 'system' ? 'system' : m.role === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
     const response = await axios.post(
       'https://api.perplexity.ai/chat/completions',
       {
         model: modelName,
-        messages: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
+        messages: filteredMessages,
         temperature: 0.7,
         max_tokens: 4096,
         stream: true,

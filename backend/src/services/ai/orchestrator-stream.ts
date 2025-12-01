@@ -76,7 +76,7 @@ export interface StreamCallbacks {
   onComplete: (fullResponse: string) => void;
   onError: (error: Error) => void;
   onAgentStart?: (provider: string, providerName: string, phase: string, round: number) => void;
-  onAgentComplete?: (provider: string) => void;
+  onAgentComplete?: (provider: string, fullContent: string) => void;
   onPhaseChange?: (phase: string) => void;
 }
 
@@ -519,7 +519,7 @@ async function handleA2AMode(
           });
         }
         
-        callbacks.onAgentComplete?.(provider);
+        callbacks.onAgentComplete?.(provider, providerResponse);
       } catch (error) {
         logger.warning(`A2A: ${provider} failed in collaboration round ${round}`, {
           error: error instanceof Error ? error.message : 'Unknown',
@@ -527,7 +527,7 @@ async function handleA2AMode(
         });
         const errorText = `오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`;
         callbacks.onChunk(errorText);
-        callbacks.onAgentComplete?.(provider);
+        callbacks.onAgentComplete?.(provider, errorText);
       }
     }
   }
@@ -568,7 +568,7 @@ async function handleA2AMode(
           });
         }
         
-        callbacks.onAgentComplete?.(provider);
+        callbacks.onAgentComplete?.(provider, providerResponse);
       } catch (error) {
         logger.warning(`A2A: ${provider} failed in debate round ${round}`, {
           error: error instanceof Error ? error.message : 'Unknown',
@@ -576,7 +576,7 @@ async function handleA2AMode(
         });
         const errorText = `오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`;
         callbacks.onChunk(errorText);
-        callbacks.onAgentComplete?.(provider);
+        callbacks.onAgentComplete?.(provider, errorText);
       }
     }
   }
@@ -691,7 +691,7 @@ async function handleA2AMode(
     logType: 'success' 
   });
   
-  callbacks.onAgentComplete?.('luxia');
+  callbacks.onAgentComplete?.('luxia', synthesisResponse);
   callbacks.onComplete(fullResponse);
 }
 

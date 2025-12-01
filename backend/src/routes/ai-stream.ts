@@ -185,8 +185,8 @@ router.post(
           onAgentStart: (providerKey: string, providerName: string, phase: string, round: number) => {
             sendSSE({ type: 'agent_start', provider: providerKey, providerName, phase, round });
           },
-          onAgentComplete: (providerKey: string) => {
-            sendSSE({ type: 'agent_complete', provider: providerKey });
+          onAgentComplete: (providerKey: string, fullContent: string) => {
+            sendSSE({ type: 'agent_complete', provider: providerKey, content: fullContent });
           },
           onPhaseChange: (phase: string) => {
             sendSSE({ type: 'phase', phase });

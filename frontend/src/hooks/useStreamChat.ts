@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuthStore } from '../store/authStore';
 
 type ChatMode = 'normal' | 'mix' | 'a2a';
@@ -22,78 +22,33 @@ interface AgentMessage {
   round?: number;
 }
 
-interface ChunkQueueItem {
-  type: 'chunk' | 'agent_start' | 'agent_complete' | 'phase' | 'complete';
-  content?: string;
+interface AgentQueueItem {
+  type: 'agent_start' | 'agent_content' | 'phase' | 'complete';
   provider?: string;
   providerName?: string;
+  content?: string;
   phase?: string;
   round?: number;
   conversationId?: number;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function typeContent(content: string, onChunk: (chunk: string) => void): Promise<void> {
+  const words = content.split(' ');
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i] + (i < words.length - 1 ? ' ' : '');
+    onChunk(word);
+    await sleep(12);
+  }
 }
 
 export function useStreamChat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
   const { token } = useAuthStore();
-  const chunkQueueRef = useRef<ChunkQueueItem[]>([]);
-  const processingRef = useRef(false);
-  const callbacksRef = useRef<{
-    onChunk?: (chunk: string) => void;
-    onComplete?: (fullResponse: string, newConversationId?: number) => void;
-    onAgentStart?: (provider: string, providerName: string, phase?: string, round?: number) => void;
-    onAgentComplete?: (agentMessage: AgentMessage) => void;
-    onPhaseChange?: (phase: string) => void;
-  }>({});
-
-  const processQueue = useCallback(() => {
-    if (processingRef.current || chunkQueueRef.current.length === 0) {
-      return;
-    }
-
-    processingRef.current = true;
-
-    const processNextItem = () => {
-      if (chunkQueueRef.current.length === 0) {
-        processingRef.current = false;
-        return;
-      }
-
-      const item = chunkQueueRef.current.shift()!;
-
-      if (item.type === 'chunk' && item.content) {
-        callbacksRef.current.onChunk?.(item.content);
-        setTimeout(processNextItem, 15);
-      } else if (item.type === 'agent_start') {
-        callbacksRef.current.onAgentStart?.(
-          item.provider || '',
-          item.providerName || '',
-          item.phase,
-          item.round
-        );
-        setTimeout(processNextItem, 50);
-      } else if (item.type === 'agent_complete') {
-        callbacksRef.current.onAgentComplete?.({
-          provider: item.provider || '',
-          providerName: item.providerName || '',
-          content: '',
-          phase: item.phase,
-          round: item.round,
-        });
-        setTimeout(processNextItem, 100);
-      } else if (item.type === 'phase') {
-        callbacksRef.current.onPhaseChange?.(item.phase || '');
-        setTimeout(processNextItem, 100);
-      } else if (item.type === 'complete') {
-        callbacksRef.current.onComplete?.(item.content || '', item.conversationId);
-        processingRef.current = false;
-      } else {
-        setTimeout(processNextItem, 10);
-      }
-    };
-
-    processNextItem();
-  }, []);
 
   const streamChat = useCallback(
     async (
@@ -110,15 +65,47 @@ export function useStreamChat() {
     ) => {
       setIsStreaming(true);
       setStreamError(null);
-      chunkQueueRef.current = [];
-      processingRef.current = false;
 
-      callbacksRef.current = {
+      const agentQueue: AgentQueueItem[] = [];
+      const callbacks = {
         onChunk,
         onComplete,
         onAgentStart,
         onAgentComplete,
         onPhaseChange,
+      };
+
+      const processAgentQueue = async () => {
+        while (agentQueue.length > 0) {
+          const item = agentQueue.shift()!;
+
+          if (item.type === 'phase') {
+            callbacks.onPhaseChange?.(item.phase || '');
+            await sleep(100);
+          } else if (item.type === 'agent_start') {
+            callbacks.onAgentStart?.(
+              item.provider || '',
+              item.providerName || '',
+              item.phase,
+              item.round
+            );
+            await sleep(50);
+          } else if (item.type === 'agent_content' && item.content) {
+            if (callbacks.onChunk) {
+              await typeContent(item.content, callbacks.onChunk);
+            }
+            callbacks.onAgentComplete?.({
+              provider: item.provider || '',
+              providerName: item.providerName || '',
+              content: item.content,
+              phase: item.phase,
+              round: item.round,
+            });
+            await sleep(200);
+          } else if (item.type === 'complete') {
+            callbacks.onComplete?.(item.content || '', item.conversationId);
+          }
+        }
       };
 
       try {
@@ -131,7 +118,7 @@ export function useStreamChat() {
           mixOfAgents: resolvedChatMode === 'mix',
         };
         
-        console.log('=== useStreamChat v7: Sending request ===', requestBody);
+        console.log('=== useStreamChat v8: Agent-based processing ===', requestBody);
         
         const response = await fetch(
           '/api/ai/chat/stream',
@@ -171,7 +158,8 @@ export function useStreamChat() {
           const { done, value } = await reader.read();
 
           if (done) {
-            console.log('=== SSE Reader done ===');
+            console.log('=== SSE Reader done, processing agent queue ===');
+            await processAgentQueue();
             break;
           }
 
@@ -189,47 +177,40 @@ export function useStreamChat() {
                   newConversationId = data.conversationId;
                 } else if (data.type === 'phase' && data.phase) {
                   currentPhase = data.phase;
-                  chunkQueueRef.current.push({
+                  agentQueue.push({
                     type: 'phase',
                     phase: data.phase,
                   });
-                  processQueue();
                 } else if (data.type === 'agent_start') {
                   currentProvider = data.provider || '';
                   currentProviderName = data.providerName || '';
                   currentRound = data.round || 0;
-                  chunkQueueRef.current.push({
+                  agentQueue.push({
                     type: 'agent_start',
                     provider: currentProvider,
                     providerName: currentProviderName,
                     phase: data.phase,
                     round: data.round,
                   });
-                  processQueue();
-                } else if (data.type === 'chunk' && data.content) {
+                } else if (data.type === 'agent_complete' && data.content) {
                   fullResponse += data.content;
-                  chunkQueueRef.current.push({
-                    type: 'chunk',
-                    content: data.content,
-                  });
-                  processQueue();
-                } else if (data.type === 'agent_complete') {
-                  chunkQueueRef.current.push({
-                    type: 'agent_complete',
-                    provider: currentProvider,
+                  agentQueue.push({
+                    type: 'agent_content',
+                    provider: data.provider || currentProvider,
                     providerName: currentProviderName,
+                    content: data.content,
                     phase: currentPhase,
                     round: currentRound,
                   });
-                  processQueue();
+                } else if (data.type === 'chunk' && data.content) {
+                  fullResponse += data.content;
                 } else if (data.type === 'complete' && data.content) {
                   fullResponse = data.content;
-                  chunkQueueRef.current.push({
+                  agentQueue.push({
                     type: 'complete',
                     content: fullResponse,
                     conversationId: newConversationId || data.conversationId,
                   });
-                  processQueue();
                 } else if (data.type === 'error') {
                   const errorMessage = data.message || 'Stream error';
                   setStreamError(errorMessage);
@@ -249,7 +230,7 @@ export function useStreamChat() {
         setIsStreaming(false);
       }
     },
-    [token, processQueue]
+    [token]
   );
 
   return {

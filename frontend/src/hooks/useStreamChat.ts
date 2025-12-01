@@ -55,6 +55,7 @@ export function useStreamChat() {
         
         console.log('=== useStreamChat v6: Sending request ===', requestBody);
         
+        console.log('=== Fetching SSE... ===');
         const response = await fetch(
           '/api/ai/chat/stream',
           {
@@ -67,12 +68,14 @@ export function useStreamChat() {
             body: JSON.stringify(requestBody),
           }
         );
+        console.log('=== Fetch response received ===', response.status, response.ok);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const reader = response.body?.getReader();
+        console.log('=== Reader created ===', !!reader);
         const decoder = new TextDecoder();
 
         if (!reader) {

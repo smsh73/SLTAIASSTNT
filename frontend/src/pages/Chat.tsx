@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ChatInput from '../components/ChatInput';
+import ChatInput, { ToolMode } from '../components/ChatInput';
 import PromptOverlay from '../components/PromptOverlay';
 import DocumentPreview from '../components/DocumentPreview';
 import LogMonitor from '../components/LogMonitor';
@@ -12,7 +12,6 @@ import { useStreamChat } from '../hooks/useStreamChat';
 import { useA2AWebSocket } from '../hooks/useA2AWebSocket';
 import { validateAndCorrectStock } from '../utils/stockValidator';
 import { searchMKNews, searchMKTV, getComprehensiveAnalysis } from '../services/mkApi';
-import type { ToolMode } from '../components/ChatInput';
 
 const sessionBase = Date.now() % 100000000;
 let messageIdCounter = 0;
@@ -207,34 +206,57 @@ export default function Chat() {
         return;
       }
 
+      const stockQuery = stockInfo.stockName || stockInfo.stockCode || input;
+      const correctedInfo = stockInfo.corrected;
+      
+      // 정정된 정보가 있으면 사용자에게 알림
+      if (correctedInfo && (correctedInfo.stockCode || correctedInfo.stockName)) {
+        const correctionMessage: Message = {
+          id: generateUniqueId(),
+          role: 'system',
+          content: `종목 정보 정정: ${correctedInfo.stockCode ? `종목코드: ${correctedInfo.stockCode}` : ''}${correctedInfo.stockName ? ` 종목명: ${correctedInfo.stockName}` : ''}`,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, correctionMessage]);
+      }
+
       const userMessage: Message = {
         id: generateUniqueId(),
         role: 'user',
-        content: `[${toolMode === 'mk-news' ? 'MK뉴스' : toolMode === 'mk-stock' ? 'MK증권' : '통합 분석'}] ${input}`,
+        content: `[${toolMode === 'mk-news' ? 'MK뉴스' : toolMode === 'mk-stock' ? 'MK증권' : '통합 분석'}] ${stockQuery}`,
         createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, userMessage]);
 
-      // 정정된 종목코드 또는 종목명 사용
-      const query = stockInfo.stockCode || stockInfo.stockName || input;
-      
-      let apiResponse: string = '';
-
       // 선택한 모드에 따라 API 호출
+      let apiResponse: string = '';
+      
       if (toolMode === 'mk-news') {
-        const response = await searchMKNews(query);
-        apiResponse = `## MK뉴스 검색 결과\n\n${response.answer}\n\n### 검색된 기사 (${response.sources.length}개)\n\n${response.sources.slice(0, 3).map((source, idx) => 
-          `${idx + 1}. **${source.article.title}**\n   - 출처: ${source.article.article_url}\n   - 점수: ${(source.score * 100).toFixed(1)}%`
-        ).join('\n\n')}`;
+        const response = await searchMKNews(stockQuery);
+        apiResponse = response.answer;
+        if (response.sources && response.sources.length > 0) {
+          apiResponse += '\n\n[참고 기사]\n';
+          response.sources.slice(0, 3).forEach((source, idx) => {
+            apiResponse += `${idx + 1}. ${source.article.title}\n   ${source.article.article_url}\n`;
+          });
+        }
       } else if (toolMode === 'mk-stock') {
-        const response = await searchMKTV(query);
-        apiResponse = `## MK증권 TV 검색 결과\n\n${response.answer}\n\n### 검색된 방송 세그먼트 (${response.sources.length}개)\n\n${response.sources.slice(0, 3).map((source, idx) => 
-          `${idx + 1}. **${source.tvSegment.program_title}**\n   - 방송일: ${source.tvSegment.broadcast_date}\n   - 점수: ${(source.score * 100).toFixed(1)}%`
-        ).join('\n\n')}`;
+        const response = await searchMKTV(stockQuery);
+        apiResponse = response.answer;
+        if (response.sources && response.sources.length > 0) {
+          apiResponse += '\n\n[참고 방송]\n';
+          response.sources.slice(0, 3).forEach((source, idx) => {
+            apiResponse += `${idx + 1}. ${source.tvSegment.program_title} (${source.tvSegment.broadcast_date})\n`;
+          });
+        }
       } else if (toolMode === 'comprehensive') {
-        const stockName = stockInfo.stockName || query;
-        const response = await getComprehensiveAnalysis(stockName);
-        apiResponse = `## ${response.stockName} 종합 분석 리포트\n\n### 요약\n${response.analysis.executiveSummary}\n\n### 회사 개요\n${response.analysis.companyOverview.businessModel}\n\n### 재무 분석\n${response.analysis.financialAnalysis.recentFinancials}\n\n### 전략 분석\n${response.analysis.strategicAnalysis.businessStrategy}\n\n### 결론\n${response.analysis.conclusion}`;
+        const response = await getComprehensiveAnalysis(stockQuery);
+        apiResponse = `# ${response.stockName} 종합 분석\n\n`;
+        apiResponse += `## 요약\n${response.analysis.executiveSummary}\n\n`;
+        apiResponse += `## 회사 개요\n${response.analysis.companyOverview.businessModel}\n\n`;
+        apiResponse += `## 재무 분석\n${response.analysis.financialAnalysis.recentFinancials}\n\n`;
+        apiResponse += `## 전략 분석\n${response.analysis.strategicAnalysis.businessStrategy}\n\n`;
+        apiResponse += `## 결론\n${response.analysis.conclusion}`;
       }
 
       // API 응답을 메시지로 표시
@@ -246,13 +268,16 @@ export default function Chat() {
       };
       setMessages((prev) => [...prev, apiResponseMessage]);
 
-      // A2A 협력모드 시작 (API 응답을 컨텍스트로 사용)
-      const a2aContext = `다음은 ${toolMode === 'mk-news' ? 'MK뉴스' : toolMode === 'mk-stock' ? 'MK증권' : '통합 분석'} API로부터 받은 ${query}에 대한 정보입니다:\n\n${apiResponse}\n\n위 정보를 바탕으로 더 깊이 있는 분석과 인사이트를 제공해주세요.`;
-      
+      // 도구 모드 초기화
+      setToolMode('none');
+
+      // A2A 협력모드 시작
       setChatMode('a2a');
       isA2AInProgressRef.current = true;
-      
-      await startA2A(a2aContext, conversationId || null, {
+
+      const a2aPrompt = `다음은 ${stockQuery}에 대한 ${toolMode === 'mk-news' ? '뉴스 기사' : toolMode === 'mk-stock' ? '증권TV 방송' : '종합 분석'} 정보입니다. 이 정보를 바탕으로 심층적인 분석과 인사이트를 제공해주세요.\n\n${apiResponse}`;
+
+      await startA2A(a2aPrompt, conversationId || null, {
         onAgentStart: (provider: string, providerName: string, phase: string, round: number) => {
           const newAgentId = generateUniqueId();
           currentAgentIdRef.current = newAgentId;
@@ -325,7 +350,6 @@ export default function Chat() {
           currentAgentIdRef.current = null;
           setCurrentAgentId(null);
           setCurrentPhase('');
-          setToolMode('none');
           
           if (pendingConversationIdRef.current) {
             const newId = pendingConversationIdRef.current;
@@ -341,11 +365,10 @@ export default function Chat() {
           setLoading(false);
           currentAgentIdRef.current = null;
           setCurrentAgentId(null);
-          setToolMode('none');
         },
       });
     } catch (error) {
-      console.error('Tool mode API error:', error);
+      console.error('Tool mode request error:', error);
       const errorMessage: Message = {
         id: generateUniqueId(),
         role: 'assistant',

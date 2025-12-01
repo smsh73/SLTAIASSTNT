@@ -64,6 +64,7 @@ export default function Chat() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pendingConversationIdRef = useRef<number | null>(null);
   
   const refreshConversationList = useCallback(() => {
     window.dispatchEvent(new CustomEvent('refreshConversations'));
@@ -84,12 +85,15 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
+    if (loading) {
+      return;
+    }
     if (conversationId) {
       loadConversation(conversationId);
     } else {
       resetConversation();
     }
-  }, [conversationId, resetConversation]);
+  }, [conversationId, resetConversation, loading]);
 
   useEffect(() => {
     const handleNewConversation = () => {
@@ -277,7 +281,7 @@ export default function Chat() {
         },
         onConversationCreated: (newConversationId: number) => {
           if (!conversationId) {
-            navigate(`/chat/${newConversationId}`, { replace: true });
+            pendingConversationIdRef.current = newConversationId;
             refreshConversationList();
           }
         },
@@ -287,6 +291,12 @@ export default function Chat() {
           currentAgentIdRef.current = null;
           setCurrentAgentId(null);
           setCurrentPhase('');
+          
+          if (pendingConversationIdRef.current) {
+            const newId = pendingConversationIdRef.current;
+            pendingConversationIdRef.current = null;
+            navigate(`/chat/${newId}`, { replace: true });
+          }
         },
         onError: (error: string) => {
           console.error('A2A WebSocket error:', error);

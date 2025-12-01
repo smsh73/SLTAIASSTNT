@@ -10,6 +10,9 @@ import { useAuthStore } from '../store/authStore';
 import { Message } from '../types/message';
 import { useStreamChat } from '../hooks/useStreamChat';
 import { useA2AWebSocket } from '../hooks/useA2AWebSocket';
+import { validateAndCorrectStock } from '../utils/stockValidator';
+import { searchMKNews, searchMKTV, getComprehensiveAnalysis } from '../services/mkApi';
+import type { ToolMode } from '../components/ChatInput';
 
 const sessionBase = Date.now() % 100000000;
 let messageIdCounter = 0;
@@ -56,13 +59,14 @@ export default function Chat() {
   const currentAgentIdRef = useRef<number | null>(null);
   const { token } = useAuthStore();
   const { streamChat } = useStreamChat();
-  const { startA2A, connect: connectA2A, isConnected: isA2AConnected } = useA2AWebSocket();
+  const { startA2A } = useA2AWebSocket();
 
   const [providers, setProviders] = useState<AIProvider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>('auto');
   const [chatMode, setChatMode] = useState<'normal' | 'mix' | 'a2a'>('normal');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [toolMode, setToolMode] = useState<ToolMode>('none');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingConversationIdRef = useRef<number | null>(null);
   const isA2AInProgressRef = useRef<boolean>(false);
@@ -183,8 +187,185 @@ export default function Chat() {
     setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
+  const handleToolModeRequest = async (input: string) => {
+    setLoading(true);
+    setCurrentInput('');
+
+    try {
+      // 종목코드/종목명 검증 및 정정
+      const stockInfo = validateAndCorrectStock(input);
+      
+      if (!stockInfo.isValid) {
+        const errorMessage: Message = {
+          id: generateUniqueId(),
+          role: 'assistant',
+          content: '종목코드(6자리 숫자) 또는 종목명(한글)을 입력해주세요.\n예: 005930 또는 삼성전자',
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+        setLoading(false);
+        return;
+      }
+
+      const userMessage: Message = {
+        id: generateUniqueId(),
+        role: 'user',
+        content: `[${toolMode === 'mk-news' ? 'MK뉴스' : toolMode === 'mk-stock' ? 'MK증권' : '통합 분석'}] ${input}`,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      // 정정된 종목코드 또는 종목명 사용
+      const query = stockInfo.stockCode || stockInfo.stockName || input;
+      
+      let apiResponse: string = '';
+
+      // 선택한 모드에 따라 API 호출
+      if (toolMode === 'mk-news') {
+        const response = await searchMKNews(query);
+        apiResponse = `## MK뉴스 검색 결과\n\n${response.answer}\n\n### 검색된 기사 (${response.sources.length}개)\n\n${response.sources.slice(0, 3).map((source, idx) => 
+          `${idx + 1}. **${source.article.title}**\n   - 출처: ${source.article.article_url}\n   - 점수: ${(source.score * 100).toFixed(1)}%`
+        ).join('\n\n')}`;
+      } else if (toolMode === 'mk-stock') {
+        const response = await searchMKTV(query);
+        apiResponse = `## MK증권 TV 검색 결과\n\n${response.answer}\n\n### 검색된 방송 세그먼트 (${response.sources.length}개)\n\n${response.sources.slice(0, 3).map((source, idx) => 
+          `${idx + 1}. **${source.tvSegment.program_title}**\n   - 방송일: ${source.tvSegment.broadcast_date}\n   - 점수: ${(source.score * 100).toFixed(1)}%`
+        ).join('\n\n')}`;
+      } else if (toolMode === 'comprehensive') {
+        const stockName = stockInfo.stockName || query;
+        const response = await getComprehensiveAnalysis(stockName);
+        apiResponse = `## ${response.stockName} 종합 분석 리포트\n\n### 요약\n${response.analysis.executiveSummary}\n\n### 회사 개요\n${response.analysis.companyOverview.businessModel}\n\n### 재무 분석\n${response.analysis.financialAnalysis.recentFinancials}\n\n### 전략 분석\n${response.analysis.strategicAnalysis.businessStrategy}\n\n### 결론\n${response.analysis.conclusion}`;
+      }
+
+      // API 응답을 메시지로 표시
+      const apiResponseMessage: Message = {
+        id: generateUniqueId(),
+        role: 'assistant',
+        content: apiResponse,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, apiResponseMessage]);
+
+      // A2A 협력모드 시작 (API 응답을 컨텍스트로 사용)
+      const a2aContext = `다음은 ${toolMode === 'mk-news' ? 'MK뉴스' : toolMode === 'mk-stock' ? 'MK증권' : '통합 분석'} API로부터 받은 ${query}에 대한 정보입니다:\n\n${apiResponse}\n\n위 정보를 바탕으로 더 깊이 있는 분석과 인사이트를 제공해주세요.`;
+      
+      setChatMode('a2a');
+      isA2AInProgressRef.current = true;
+      
+      await startA2A(a2aContext, conversationId || null, {
+        onAgentStart: (provider: string, providerName: string, phase: string, round: number) => {
+          const newAgentId = generateUniqueId();
+          currentAgentIdRef.current = newAgentId;
+          setCurrentAgentId(newAgentId);
+          
+          const phaseLabel = phase === 'collaboration' 
+            ? `협력 라운드 ${round}` 
+            : phase === 'debate' 
+              ? `토론 라운드 ${round}` 
+              : phase === 'synthesis' 
+                ? '최종 종합' 
+                : '';
+          
+          const newAgentMessage: Message = {
+            id: newAgentId,
+            role: 'assistant',
+            content: '',
+            createdAt: new Date().toISOString(),
+            provider: provider,
+            providerName: providerName,
+            phase: phaseLabel,
+          };
+          
+          setMessages((prev) => [...prev, newAgentMessage]);
+        },
+        onAgentChunk: (_provider: string, chunk: string) => {
+          const agentId = currentAgentIdRef.current;
+          if (agentId) {
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === agentId
+                  ? { ...msg, content: msg.content + chunk }
+                  : msg
+              )
+            );
+          }
+        },
+        onAgentComplete: (_agent: AgentMessage) => {
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+        },
+        onPhaseChange: (phase: string) => {
+          setCurrentPhase(phase);
+          
+          const phaseMessage: Message = {
+            id: generateUniqueId(),
+            role: 'system',
+            content: phase === 'collaboration' 
+              ? '### 1단계: 협력적 인사이트 공유' 
+              : phase === 'debate' 
+                ? '### 2단계: 토론 및 보완' 
+                : phase === 'synthesis' 
+                  ? '### 3단계: 최종 종합' 
+                  : phase,
+            createdAt: new Date().toISOString(),
+          };
+          
+          setMessages((prev) => [...prev, phaseMessage]);
+        },
+        onConversationCreated: (newConversationId: number) => {
+          if (!conversationId) {
+            pendingConversationIdRef.current = newConversationId;
+            refreshConversationList();
+          }
+        },
+        onComplete: (_conversationId: number) => {
+          isA2AInProgressRef.current = false;
+          setStreamingMessage('');
+          setLoading(false);
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+          setCurrentPhase('');
+          setToolMode('none');
+          
+          if (pendingConversationIdRef.current) {
+            const newId = pendingConversationIdRef.current;
+            pendingConversationIdRef.current = null;
+            skipNextLoadRef.current = true;
+            navigate(`/chat/${newId}`, { replace: true });
+          }
+        },
+        onError: (error: string) => {
+          console.error('A2A WebSocket error:', error);
+          isA2AInProgressRef.current = false;
+          setStreamingMessage('');
+          setLoading(false);
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+          setToolMode('none');
+        },
+      });
+    } catch (error) {
+      console.error('Tool mode API error:', error);
+      const errorMessage: Message = {
+        id: generateUniqueId(),
+        role: 'assistant',
+        content: `오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+      setLoading(false);
+      setToolMode('none');
+    }
+  };
+
   const handleSend = async (message: string) => {
     if (!message.trim()) return;
+
+    // 도구 모드가 선택된 경우 처리
+    if (toolMode !== 'none') {
+      await handleToolModeRequest(message);
+      return;
+    }
 
     let fullMessage = message;
     if (uploadedFiles.length > 0) {
@@ -526,6 +707,8 @@ export default function Chat() {
               onSuggestionsChange={setSuggestions}
               onSuggestionsLoadingChange={setSuggestionsLoading}
               loading={loading}
+              toolMode={toolMode}
+              onToolModeChange={setToolMode}
             />
           </div>
         </div>

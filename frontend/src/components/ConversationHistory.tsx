@@ -8,7 +8,6 @@ interface ConversationHistoryProps {
 
 const MarkdownRenderer = ({ content }: { content: string }) => {
   return (
-    // @ts-expect-error - React 18 type compatibility issue with react-markdown
     <Markdown remarkPlugins={[remarkGfm]}>
       {content}
     </Markdown>

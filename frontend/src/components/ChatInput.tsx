@@ -1,6 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { usePromptSuggestion } from '../hooks/usePromptSuggestion';
 
+export type ToolMode = 'none' | 'mk-news' | 'mk-stock' | 'comprehensive';
+
 interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -8,6 +10,8 @@ interface ChatInputProps {
   onSuggestionsChange: (suggestions: string[]) => void;
   onSuggestionsLoadingChange?: (loading: boolean) => void;
   loading: boolean;
+  toolMode?: ToolMode;
+  onToolModeChange?: (mode: ToolMode) => void;
 }
 
 export default function ChatInput({
@@ -17,6 +21,8 @@ export default function ChatInput({
   onSuggestionsChange,
   onSuggestionsLoadingChange,
   loading,
+  toolMode = 'none',
+  onToolModeChange,
 }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,13 +76,36 @@ export default function ChatInput({
 
   return (
     <div className="relative">
+      <div className="mb-2 flex items-center gap-2">
+        <label className="text-sm text-gray-600 font-medium">도구 모드:</label>
+        <select
+          value={toolMode}
+          onChange={(e) => onToolModeChange?.(e.target.value as ToolMode)}
+          disabled={loading}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <option value="none">없음</option>
+          <option value="mk-news">MK뉴스</option>
+          <option value="mk-stock">MK증권</option>
+          <option value="comprehensive">통합 분석</option>
+        </select>
+        {toolMode !== 'none' && (
+          <span className="text-xs text-gray-500">
+            종목코드 또는 종목명을 입력하세요
+          </span>
+        )}
+      </div>
       <div className="flex items-end space-x-2 bg-white rounded-lg border border-gray-300 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-200">
         <textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="메시지를 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)"
+          placeholder={
+            toolMode !== 'none'
+              ? '종목코드(예: 005930) 또는 종목명(예: 삼성전자)을 입력하세요...'
+              : '메시지를 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)'
+          }
           className="flex-1 px-4 py-3 resize-none border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400"
           rows={1}
           aria-label="메시지 입력"

@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import http from 'http';
 import { fileURLToPath } from 'url';
 import { logger } from './utils/logger.js';
+import { initSocketIO } from './utils/socket.js';
 import { configureCORS, securityHeaders } from './middleware/security.js';
 import { createRateLimiter } from './middleware/rateLimiter.js';
 import { metricsMiddleware } from './middleware/metrics.js';
@@ -12,7 +14,6 @@ import { validateEnvironment } from './utils/env-validator.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 환경 변수 검증 (애플리케이션 시작 전)
 try {
   validateEnvironment();
 } catch (error) {
@@ -21,34 +22,31 @@ try {
 }
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 
-// 보안 미들웨어
+const io = initSocketIO(server);
+
 app.use(securityHeaders);
 app.use(configureCORS());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 메트릭 미들웨어
 app.use(metricsMiddleware);
 
-// Rate limiting
 app.use('/api/', createRateLimiter({
-  windowMs: 15 * 60 * 1000, // 15분
-  maxRequests: 500, // 기본 제한 (증가)
+  windowMs: 15 * 60 * 1000,
+  maxRequests: 500,
 }));
 
-// AI API - A2A 모드는 여러 에이전트를 호출하므로 충분한 제한 필요
 app.use('/api/ai/', createRateLimiter({
-  windowMs: 60 * 1000, // 1분
-  maxRequests: 100, // A2A 모드 지원을 위해 증가
+  windowMs: 60 * 1000,
+  maxRequests: 100,
 }));
 
-// Serve uploaded files
 const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
 app.use('/uploads', express.static(path.resolve(UPLOAD_DIR)));
 
-// Health check
 app.get('/health', async (req, res) => {
   try {
     const { checkDatabaseConnection } = await import('./utils/database.js');
@@ -58,6 +56,7 @@ app.get('/health', async (req, res) => {
       status: dbConnected ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       database: dbConnected ? 'connected' : 'disconnected',
+      websocket: io ? 'ready' : 'not initialized',
       uptime: process.uptime(),
     });
   } catch (error) {
@@ -70,10 +69,10 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Routes
 import authRoutes from './routes/auth.js';
 import aiRoutes from './routes/ai.js';
 import aiStreamRoutes from './routes/ai-stream.js';
+import aiWebsocketRoutes from './routes/ai-websocket.js';
 import documentRoutes from './routes/documents.js';
 import codeRoutes from './routes/code.js';
 import workflowRoutes from './routes/workflows.js';
@@ -85,9 +84,11 @@ import multimodalRoutes from './routes/multimodal.js';
 import metricsRoutes from './routes/metrics.js';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './utils/swagger.js';
+
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/ai', aiStreamRoutes);
+app.use('/api/ai', aiWebsocketRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/code', codeRoutes);
 app.use('/api/workflows', workflowRoutes);
@@ -98,10 +99,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/multimodal', multimodalRoutes);
 app.use('/metrics', metricsRoutes);
 
-// Swagger API 문서
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../../frontend/dist');
   app.use(express.static(frontendBuildPath));
@@ -115,18 +114,21 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// 에러 핸들러 (모든 라우트 이후에 위치)
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 if (process.env.NODE_ENV !== 'production') {
   app.use(notFoundHandler);
 }
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, {
     screenName: 'Server',
-    callerFunction: 'app.listen',
+    callerFunction: 'server.listen',
     logType: 'info',
   });
+  logger.info('WebSocket server ready', {
+    screenName: 'WebSocket',
+    callerFunction: 'server.listen',
+    logType: 'success',
+  });
 });
-

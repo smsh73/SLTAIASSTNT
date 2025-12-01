@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import { Message } from '../types/message';
 import { useStreamChat } from '../hooks/useStreamChat';
+import { useA2AWebSocket } from '../hooks/useA2AWebSocket';
 
 const sessionBase = Date.now() % 100000000;
 let messageIdCounter = 0;
@@ -55,6 +56,7 @@ export default function Chat() {
   const currentAgentIdRef = useRef<number | null>(null);
   const { token } = useAuthStore();
   const { streamChat } = useStreamChat();
+  const { startA2A, connect: connectA2A, isConnected: isA2AConnected } = useA2AWebSocket();
 
   const [providers, setProviders] = useState<AIProvider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>('auto');
@@ -211,43 +213,10 @@ export default function Chat() {
     });
 
     if (chatMode === 'a2a') {
-      await streamChat(
-        fullMessage,
-        conversationId || null,
-        selectedProvider !== 'auto' ? selectedProvider : undefined,
-        chatMode,
-        (chunk: string) => {
-          const agentId = currentAgentIdRef.current;
-          if (agentId) {
-            setMessages((prevMessages) =>
-              prevMessages.map((msg) =>
-                msg.id === agentId
-                  ? { ...msg, content: msg.content + chunk }
-                  : msg
-              )
-            );
-          }
-        },
-        (_fullResponse, newConversationId) => {
-          setStreamingMessage('');
-          setLoading(false);
-          currentAgentIdRef.current = null;
-          setCurrentAgentId(null);
-          setCurrentPhase('');
-          
-          if (newConversationId && !conversationId) {
-            navigate(`/chat/${newConversationId}`, { replace: true });
-            refreshConversationList();
-          }
-        },
-        (error: string) => {
-          console.error('Stream error:', error);
-          setStreamingMessage('');
-          setLoading(false);
-          currentAgentIdRef.current = null;
-          setCurrentAgentId(null);
-        },
-        (provider: string, providerName: string, phase?: string, round?: number) => {
+      console.log('=== Starting A2A with WebSocket ===');
+      
+      await startA2A(fullMessage, conversationId || null, {
+        onAgentStart: (provider: string, providerName: string, phase: string, round: number) => {
           const newAgentId = generateUniqueId();
           currentAgentIdRef.current = newAgentId;
           setCurrentAgentId(newAgentId);
@@ -272,11 +241,23 @@ export default function Chat() {
           
           setMessages((prev) => [...prev, newAgentMessage]);
         },
-        (_agentMessage: AgentMessage) => {
+        onAgentChunk: (_provider: string, chunk: string) => {
+          const agentId = currentAgentIdRef.current;
+          if (agentId) {
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === agentId
+                  ? { ...msg, content: msg.content + chunk }
+                  : msg
+              )
+            );
+          }
+        },
+        onAgentComplete: (_agent: AgentMessage) => {
           currentAgentIdRef.current = null;
           setCurrentAgentId(null);
         },
-        (phase: string) => {
+        onPhaseChange: (phase: string) => {
           setCurrentPhase(phase);
           
           const phaseMessage: Message = {
@@ -293,8 +274,28 @@ export default function Chat() {
           };
           
           setMessages((prev) => [...prev, phaseMessage]);
-        }
-      );
+        },
+        onConversationCreated: (newConversationId: number) => {
+          if (!conversationId) {
+            navigate(`/chat/${newConversationId}`, { replace: true });
+            refreshConversationList();
+          }
+        },
+        onComplete: (_conversationId: number) => {
+          setStreamingMessage('');
+          setLoading(false);
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+          setCurrentPhase('');
+        },
+        onError: (error: string) => {
+          console.error('A2A WebSocket error:', error);
+          setStreamingMessage('');
+          setLoading(false);
+          currentAgentIdRef.current = null;
+          setCurrentAgentId(null);
+        },
+      });
     } else {
       const assistantMessageId = generateUniqueId();
       const assistantMessage: Message = {

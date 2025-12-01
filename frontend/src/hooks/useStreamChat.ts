@@ -22,16 +22,6 @@ interface AgentMessage {
   round?: number;
 }
 
-interface AgentQueueItem {
-  type: 'agent_start' | 'agent_content' | 'phase' | 'complete';
-  provider?: string;
-  providerName?: string;
-  content?: string;
-  phase?: string;
-  round?: number;
-  conversationId?: number;
-}
-
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -41,7 +31,7 @@ async function typeContent(content: string, onChunk: (chunk: string) => void): P
   for (let i = 0; i < words.length; i++) {
     const word = words[i] + (i < words.length - 1 ? ' ' : '');
     onChunk(word);
-    await sleep(12);
+    await sleep(8);
   }
 }
 
@@ -66,48 +56,6 @@ export function useStreamChat() {
       setIsStreaming(true);
       setStreamError(null);
 
-      const agentQueue: AgentQueueItem[] = [];
-      const callbacks = {
-        onChunk,
-        onComplete,
-        onAgentStart,
-        onAgentComplete,
-        onPhaseChange,
-      };
-
-      const processAgentQueue = async () => {
-        while (agentQueue.length > 0) {
-          const item = agentQueue.shift()!;
-
-          if (item.type === 'phase') {
-            callbacks.onPhaseChange?.(item.phase || '');
-            await sleep(100);
-          } else if (item.type === 'agent_start') {
-            callbacks.onAgentStart?.(
-              item.provider || '',
-              item.providerName || '',
-              item.phase,
-              item.round
-            );
-            await sleep(50);
-          } else if (item.type === 'agent_content' && item.content) {
-            if (callbacks.onChunk) {
-              await typeContent(item.content, callbacks.onChunk);
-            }
-            callbacks.onAgentComplete?.({
-              provider: item.provider || '',
-              providerName: item.providerName || '',
-              content: item.content,
-              phase: item.phase,
-              round: item.round,
-            });
-            await sleep(200);
-          } else if (item.type === 'complete') {
-            callbacks.onComplete?.(item.content || '', item.conversationId);
-          }
-        }
-      };
-
       try {
         const resolvedChatMode = chatMode || 'normal';
         const requestBody = {
@@ -118,7 +66,7 @@ export function useStreamChat() {
           mixOfAgents: resolvedChatMode === 'mix',
         };
         
-        console.log('=== useStreamChat v8: Agent-based processing ===', requestBody);
+        console.log('=== useStreamChat v9: Immediate display ===', requestBody);
         
         const response = await fetch(
           '/api/ai/chat/stream',
@@ -158,8 +106,7 @@ export function useStreamChat() {
           const { done, value } = await reader.read();
 
           if (done) {
-            console.log('=== SSE Reader done, agentQueue length:', agentQueue.length);
-            await processAgentQueue();
+            console.log('=== SSE Reader done ===');
             break;
           }
 
@@ -172,49 +119,42 @@ export function useStreamChat() {
             if (line.startsWith('data: ')) {
               try {
                 const data: StreamMessage = JSON.parse(line.substring(6));
-                console.log('=== SSE Event:', data.type, data.provider || '', data.content?.substring(0, 30) || '');
 
                 if (data.type === 'conversationId' && data.conversationId) {
                   newConversationId = data.conversationId;
+                  console.log('=== New conversationId:', newConversationId);
                 } else if (data.type === 'phase' && data.phase) {
                   currentPhase = data.phase;
-                  agentQueue.push({
-                    type: 'phase',
-                    phase: data.phase,
-                  });
+                  console.log('=== Phase change:', data.phase);
+                  onPhaseChange?.(data.phase);
                 } else if (data.type === 'agent_start') {
                   currentProvider = data.provider || '';
                   currentProviderName = data.providerName || '';
                   currentRound = data.round || 0;
-                  agentQueue.push({
-                    type: 'agent_start',
-                    provider: currentProvider,
-                    providerName: currentProviderName,
-                    phase: data.phase,
-                    round: data.round,
-                  });
+                  console.log('=== Agent start:', currentProvider, currentProviderName, data.phase, data.round);
+                  onAgentStart?.(currentProvider, currentProviderName, data.phase, data.round);
                 } else if (data.type === 'agent_complete' && data.content) {
-                  console.log('=== agent_complete with content, length:', data.content.length);
+                  console.log('=== Agent complete with content:', data.provider, 'length:', data.content.length);
                   fullResponse += data.content;
-                  agentQueue.push({
-                    type: 'agent_content',
+                  
+                  if (onChunk) {
+                    await typeContent(data.content, onChunk);
+                  }
+                  
+                  onAgentComplete?.({
                     provider: data.provider || currentProvider,
                     providerName: currentProviderName,
                     content: data.content,
                     phase: currentPhase,
                     round: currentRound,
                   });
-                } else if (data.type === 'agent_complete') {
-                  console.log('=== agent_complete WITHOUT content');
                 } else if (data.type === 'chunk' && data.content) {
                   fullResponse += data.content;
+                  onChunk?.(data.content);
                 } else if (data.type === 'complete' && data.content) {
+                  console.log('=== Stream complete, total length:', data.content.length);
                   fullResponse = data.content;
-                  agentQueue.push({
-                    type: 'complete',
-                    content: fullResponse,
-                    conversationId: newConversationId || data.conversationId,
-                  });
+                  onComplete?.(fullResponse, newConversationId || data.conversationId);
                 } else if (data.type === 'error') {
                   const errorMessage = data.message || 'Stream error';
                   setStreamError(errorMessage);

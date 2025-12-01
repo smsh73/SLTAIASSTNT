@@ -46,10 +46,11 @@ export default function ConversationHistory({
 }: ConversationHistoryProps) {
   return (
     <div className="space-y-4">
-      {messages.map((message) => {
+      {messages.map((message, index) => {
+        const uniqueKey = `msg-${message.id}-${index}`;
         if (message.role === 'system') {
           return (
-            <div key={message.id} className="flex justify-center">
+            <div key={uniqueKey} className="flex justify-center">
               <div className="bg-gradient-to-r from-primary-100 to-primary-50 text-primary-800 px-6 py-2 rounded-full text-sm font-medium shadow-sm border border-primary-200">
                 {message.content}
               </div>
@@ -62,7 +63,7 @@ export default function ConversationHistory({
         
         return (
           <div
-            key={message.id}
+            key={uniqueKey}
             className={`flex ${
               message.role === 'user' ? 'justify-end' : 'justify-start'
             }`}

@@ -368,11 +368,25 @@ export default function Chat() {
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex space-x-2">
-                      <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
+                    {chatMode === 'a2a' ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+                          <span className="text-sm text-gray-600 font-medium">A2A 협력 토론 진행 중...</span>
+                        </div>
+                        <div className="text-xs text-gray-500 pl-5">
+                          <p>OpenAI, Claude, Gemini, Perplexity가 순차적으로 토론합니다.</p>
+                          <p className="mt-1">협력(2라운드) → 토론(2라운드) → 최종 종합</p>
+                          <p className="mt-1 text-gray-400">약 2-3분 소요될 수 있습니다.</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

@@ -158,7 +158,7 @@ export function useStreamChat() {
           const { done, value } = await reader.read();
 
           if (done) {
-            console.log('=== SSE Reader done, processing agent queue ===');
+            console.log('=== SSE Reader done, agentQueue length:', agentQueue.length);
             await processAgentQueue();
             break;
           }
@@ -172,6 +172,7 @@ export function useStreamChat() {
             if (line.startsWith('data: ')) {
               try {
                 const data: StreamMessage = JSON.parse(line.substring(6));
+                console.log('=== SSE Event:', data.type, data.provider || '', data.content?.substring(0, 30) || '');
 
                 if (data.type === 'conversationId' && data.conversationId) {
                   newConversationId = data.conversationId;
@@ -193,6 +194,7 @@ export function useStreamChat() {
                     round: data.round,
                   });
                 } else if (data.type === 'agent_complete' && data.content) {
+                  console.log('=== agent_complete with content, length:', data.content.length);
                   fullResponse += data.content;
                   agentQueue.push({
                     type: 'agent_content',
@@ -202,6 +204,8 @@ export function useStreamChat() {
                     phase: currentPhase,
                     round: currentRound,
                   });
+                } else if (data.type === 'agent_complete') {
+                  console.log('=== agent_complete WITHOUT content');
                 } else if (data.type === 'chunk' && data.content) {
                   fullResponse += data.content;
                 } else if (data.type === 'complete' && data.content) {

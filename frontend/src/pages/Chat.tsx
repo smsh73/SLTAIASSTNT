@@ -490,7 +490,7 @@ export default function Chat() {
 
           <div className="relative">
             <PromptOverlay
-              show={showOverlay}
+              show={showOverlay && currentInput.trim().length > 0}
               suggestions={suggestions}
               loading={suggestionsLoading}
               onSelect={(suggestion) => {

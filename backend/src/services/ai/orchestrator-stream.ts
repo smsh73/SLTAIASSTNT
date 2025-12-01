@@ -581,51 +581,62 @@ async function handleA2AMode(
     }
   }
 
+  logger.info('=== A2A: Starting synthesis phase ===', {
+    historyLength: conversationHistory.length,
+    logType: 'info',
+  });
+
   callbacks.onPhaseChange?.('synthesis');
   callbacks.onAgentStart?.('luxia', 'Luxia AI', 'synthesis', 1);
 
+  let synthesisResponse = '';
+  
   try {
+    logger.info('A2A: Building synthesis messages for Luxia', { logType: 'info' });
     const synthesisMessages = buildSynthesisMessages(userPrompt, conversationHistory);
     
-    let synthesisResponse = '';
-    try {
-      const stream = await streamLuxia(synthesisMessages);
-      if (stream) {
-        let buffer = '';
-        await new Promise<void>((resolve, reject) => {
-          stream.on('data', (chunk: Buffer) => {
-            buffer += chunk.toString();
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-            
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-                if (data === '[DONE]') continue;
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices?.[0]?.delta?.content || '';
-                  if (content) {
-                    synthesisResponse += content;
-                    fullResponse += content;
-                    callbacks.onChunk(content);
-                  }
-                } catch {}
-              }
+    logger.info('A2A: Attempting Luxia streaming...', { logType: 'info' });
+    const stream = await streamLuxia(synthesisMessages);
+    
+    if (stream) {
+      logger.info('A2A: Luxia stream obtained, starting to read...', { logType: 'info' });
+      let buffer = '';
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (chunk: Buffer) => {
+          buffer += chunk.toString();
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content || '';
+                if (content) {
+                  synthesisResponse += content;
+                  fullResponse += content;
+                  callbacks.onChunk(content);
+                }
+              } catch {}
             }
-          });
-          stream.on('end', () => resolve());
-          stream.on('error', (error: Error) => reject(error));
+          }
         });
-      }
-    } catch (luxiaError) {
-      logger.warning('Luxia streaming failed, trying non-stream', {
-        error: luxiaError instanceof Error ? luxiaError.message : 'Unknown',
-        logType: 'warning',
+        stream.on('end', () => {
+          logger.info('A2A: Luxia stream ended', { responseLength: synthesisResponse.length, logType: 'success' });
+          resolve();
+        });
+        stream.on('error', (error: Error) => {
+          logger.error('A2A: Luxia stream error event', { error: error.message, logType: 'error' });
+          reject(error);
+        });
       });
-      
+    } else {
+      logger.warning('A2A: Luxia stream is null, using non-stream fallback', { logType: 'warning' });
       const luxiaResponse = await chatWithLuxia(synthesisMessages);
       if (luxiaResponse) {
+        logger.info('A2A: Luxia non-stream response received', { responseLength: luxiaResponse.length, logType: 'success' });
         const words = luxiaResponse.split(' ');
         for (let i = 0; i < words.length; i++) {
           const word = words[i] + (i < words.length - 1 ? ' ' : '');
@@ -633,14 +644,20 @@ async function handleA2AMode(
           fullResponse += word;
           callbacks.onChunk(word);
           if (i % 5 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise(resolve => setTimeout(resolve, 3));
           }
         }
       }
     }
+  } catch (luxiaError) {
+    logger.warning('Luxia failed, trying Claude fallback', {
+      error: luxiaError instanceof Error ? luxiaError.message : 'Unknown',
+      logType: 'warning',
+    });
     
-    if (!synthesisResponse) {
-      callbacks.onChunk('Luxia 응답 실패, Claude로 대체 종합 중...\n\n');
+    try {
+      const synthesisMessages = buildSynthesisMessages(userPrompt, conversationHistory);
+      callbacks.onChunk('Claude로 대체 종합 중...\n\n');
       
       await new Promise<void>((resolve, reject) => {
         chatWithClaudeStream(synthesisMessages, {
@@ -649,19 +666,30 @@ async function handleA2AMode(
             fullResponse += chunk;
             callbacks.onChunk(chunk);
           },
-          onComplete: () => resolve(),
+          onComplete: () => {
+            logger.info('A2A: Claude fallback completed', { responseLength: synthesisResponse.length, logType: 'success' });
+            resolve();
+          },
           onError: (error: Error) => reject(error),
         });
       });
+    } catch (claudeError) {
+      logger.error('A2A synthesis failed completely', {
+        error: claudeError instanceof Error ? claudeError.message : 'Unknown',
+        logType: 'error',
+      });
+      const errorText = '최종 종합 중 오류가 발생했습니다.';
+      callbacks.onChunk(errorText);
+      synthesisResponse = errorText;
+      fullResponse += errorText;
     }
-  } catch (error) {
-    logger.error('A2A synthesis failed', {
-      error: error instanceof Error ? error.message : 'Unknown',
-      logType: 'error',
-    });
-    const errorText = '최종 종합 중 오류가 발생했습니다.';
-    callbacks.onChunk(errorText);
   }
+  
+  logger.info('A2A: Synthesis phase completed', { 
+    synthesisLength: synthesisResponse.length,
+    totalLength: fullResponse.length,
+    logType: 'success' 
+  });
   
   callbacks.onAgentComplete?.('luxia');
   callbacks.onComplete(fullResponse);

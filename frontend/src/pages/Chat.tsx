@@ -10,10 +10,12 @@ import { useAuthStore } from '../store/authStore';
 import { Message } from '../types/message';
 import { useStreamChat } from '../hooks/useStreamChat';
 
+const sessionTimestamp = Date.now();
 let messageIdCounter = 0;
 function generateUniqueId(): number {
   messageIdCounter += 1;
-  return Date.now() * 1000 + messageIdCounter;
+  const uniquePart = Math.floor(Math.random() * 1000);
+  return Number(`${sessionTimestamp}${String(messageIdCounter).padStart(4, '0')}${uniquePart}`);
 }
 
 interface AgentMessage {

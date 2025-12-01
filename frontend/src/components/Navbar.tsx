@@ -17,7 +17,7 @@ export default function Navbar() {
           onClick={() => navigate('/')}
           className="text-xl font-bold text-primary-700 cursor-pointer hover:text-primary-800 transition-colors"
         >
-          솔트룩스 AI 어시스턴트
+          매경AX
         </h1>
       </div>
       <div className="flex items-center space-x-4">

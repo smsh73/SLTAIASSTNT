@@ -1,8 +1,10 @@
-# Saltlux AI Assistant
+# 매경AX (MK AI eXperience)
 
 ## Overview
 
-A fullstack AI assistant application with a React + Vite frontend and Node.js + Express backend. The application provides AI chat capabilities, document management, code generation/execution, and workflow automation.
+A fullstack AI assistant application for Maeil Business Newspaper (매일경제) with a React + Vite frontend and Node.js + Express backend. The application provides AI chat capabilities, document management, code generation/execution, and workflow automation.
+
+Brand color: Navy blue (#003366) - matching Maeil Business Newspaper brand identity.
 
 ## Project Structure
 

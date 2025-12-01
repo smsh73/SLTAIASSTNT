@@ -35,8 +35,9 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-8 text-primary-700">
-          솔트룩스 AI 어시스턴트
+          매경AX
         </h1>
+        <p className="text-center text-gray-500 -mt-6 mb-6 text-sm">AI 어시스턴트</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && (

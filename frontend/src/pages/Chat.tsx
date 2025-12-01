@@ -374,7 +374,7 @@ export default function Chat() {
           {messages.length === 0 ? (
             <div className="text-center text-gray-500 mt-20">
               <h2 className="text-2xl font-semibold mb-4">
-                AI 어시스턴트와 대화를 시작하세요
+                매경AX와 대화를 시작하세요
               </h2>
               <p className="text-gray-400">
                 아래 입력창에 메시지를 입력하거나 프롬프트 예시를 확인하세요

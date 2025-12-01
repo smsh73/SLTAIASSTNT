@@ -1,0 +1,27 @@
+name: Push to Repository
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "smsh73"
+          git config --global user.email "smsh73@users.noreply.github.com"
+      
+      - name: Push to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/smsh73/SLTAIASSTNT.git
+          git push origin main
+

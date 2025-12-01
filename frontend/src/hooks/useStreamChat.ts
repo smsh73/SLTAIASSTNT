@@ -87,14 +87,19 @@ export function useStreamChat() {
         let currentPhase = '';
         let currentRound = 0;
 
+        console.log('=== SSE Reader started ===');
+        
         while (true) {
           const { done, value } = await reader.read();
 
           if (done) {
+            console.log('=== SSE Reader done ===');
             break;
           }
 
-          buffer += decoder.decode(value, { stream: true });
+          const chunk = decoder.decode(value, { stream: true });
+          console.log('=== SSE Chunk received ===', chunk.substring(0, 100));
+          buffer += chunk;
           const lines = buffer.split('\n\n');
           buffer = lines.pop() || '';
 
@@ -104,6 +109,7 @@ export function useStreamChat() {
             if (line.startsWith('data: ')) {
               try {
                 const data: StreamMessage = JSON.parse(line.substring(6));
+                console.log('=== SSE Data parsed ===', data.type);
 
                 if (data.type === 'conversationId' && data.conversationId) {
                   newConversationId = data.conversationId;

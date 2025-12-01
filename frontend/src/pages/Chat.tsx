@@ -65,6 +65,8 @@ export default function Chat() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingConversationIdRef = useRef<number | null>(null);
+  const isA2AInProgressRef = useRef<boolean>(false);
+  const skipNextLoadRef = useRef<boolean>(false);
   
   const refreshConversationList = useCallback(() => {
     window.dispatchEvent(new CustomEvent('refreshConversations'));
@@ -85,7 +87,8 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    if (loading) {
+    if (isA2AInProgressRef.current || skipNextLoadRef.current) {
+      skipNextLoadRef.current = false;
       return;
     }
     if (conversationId) {
@@ -93,7 +96,7 @@ export default function Chat() {
     } else {
       resetConversation();
     }
-  }, [conversationId, resetConversation, loading]);
+  }, [conversationId, resetConversation]);
 
   useEffect(() => {
     const handleNewConversation = () => {
@@ -218,6 +221,7 @@ export default function Chat() {
 
     if (chatMode === 'a2a') {
       console.log('=== Starting A2A with WebSocket ===');
+      isA2AInProgressRef.current = true;
       
       await startA2A(fullMessage, conversationId || null, {
         onAgentStart: (provider: string, providerName: string, phase: string, round: number) => {
@@ -286,6 +290,7 @@ export default function Chat() {
           }
         },
         onComplete: (_conversationId: number) => {
+          isA2AInProgressRef.current = false;
           setStreamingMessage('');
           setLoading(false);
           currentAgentIdRef.current = null;
@@ -295,11 +300,13 @@ export default function Chat() {
           if (pendingConversationIdRef.current) {
             const newId = pendingConversationIdRef.current;
             pendingConversationIdRef.current = null;
+            skipNextLoadRef.current = true;
             navigate(`/chat/${newId}`, { replace: true });
           }
         },
         onError: (error: string) => {
           console.error('A2A WebSocket error:', error);
+          isA2AInProgressRef.current = false;
           setStreamingMessage('');
           setLoading(false);
           currentAgentIdRef.current = null;

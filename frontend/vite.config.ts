@@ -1,8 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@assets': path.resolve(__dirname, 'attached_assets'),
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 5000,
@@ -13,6 +19,16 @@ export default defineConfig({
       'Expires': '0',
     },
     proxy: {
+      '/api/ai/chat/stream': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['cache-control'] = 'no-cache';
+            proxyRes.headers['x-accel-buffering'] = 'no';
+          });
+        },
+      },
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
@@ -24,4 +40,3 @@ export default defineConfig({
     },
   },
 })
-

@@ -113,12 +113,26 @@ router.post(
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no');
-      res.setHeader('Transfer-Encoding', 'chunked');
       res.flushHeaders();
+      
+      // Nagle 알고리즘 비활성화 - 즉시 전송
+      if (res.socket) {
+        res.socket.setNoDelay(true);
+      }
+
+      // SSE 메시지 전송 헬퍼 - 즉시 플러시
+      const sendSSE = (data: object) => {
+        const message = `data: ${JSON.stringify(data)}\n\n`;
+        res.write(message);
+        // 버퍼 즉시 플러시
+        if (res.socket && !res.socket.destroyed) {
+          res.socket.uncork?.();
+        }
+      };
 
       // 새 대화인 경우 conversationId를 클라이언트에 전송
       if (isNewConversation) {
-        res.write(`data: ${JSON.stringify({ type: 'conversationId', conversationId: activeConversationId })}\n\n`);
+        sendSSE({ type: 'conversationId', conversationId: activeConversationId });
       }
 
       // 스트리밍 시작
@@ -140,7 +154,7 @@ router.post(
         message,
         {
           onChunk: (chunk: string) => {
-            res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
+            sendSSE({ type: 'chunk', content: chunk });
           },
           onComplete: async (fullResponse: string) => {
             try {
@@ -156,7 +170,7 @@ router.post(
                 logType: 'error',
               });
             }
-            res.write(`data: ${JSON.stringify({ type: 'complete', content: fullResponse, conversationId: activeConversationId })}\n\n`);
+            sendSSE({ type: 'complete', content: fullResponse, conversationId: activeConversationId });
             res.end();
           },
           onError: (error: Error) => {
@@ -165,17 +179,17 @@ router.post(
               error: error.message,
               logType: 'error',
             });
-            res.write(`data: ${JSON.stringify({ type: 'error', message: error.message })}\n\n`);
+            sendSSE({ type: 'error', message: error.message });
             res.end();
           },
           onAgentStart: (providerKey: string, providerName: string, phase: string, round: number) => {
-            res.write(`data: ${JSON.stringify({ type: 'agent_start', provider: providerKey, providerName, phase, round })}\n\n`);
+            sendSSE({ type: 'agent_start', provider: providerKey, providerName, phase, round });
           },
           onAgentComplete: (providerKey: string) => {
-            res.write(`data: ${JSON.stringify({ type: 'agent_complete', provider: providerKey })}\n\n`);
+            sendSSE({ type: 'agent_complete', provider: providerKey });
           },
           onPhaseChange: (phase: string) => {
-            res.write(`data: ${JSON.stringify({ type: 'phase', phase })}\n\n`);
+            sendSSE({ type: 'phase', phase });
           },
         },
         {
